@@ -35,7 +35,7 @@ class _MyAppState extends State<MyApp> {
       title: 'My App',
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        appBar: TopBar(title: _getTitle(_selectedIndex)),
+        // appBar: TopBar(title: _getTitle(_selectedIndex)),
         body: _pages[_selectedIndex],
         bottomNavigationBar: BottomBar(
           currentIndex: _selectedIndex,
