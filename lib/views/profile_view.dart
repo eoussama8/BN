@@ -80,12 +80,19 @@ class _ProfileViewState extends State<ProfileView> {
 
     try {
       var request = http.MultipartRequest('POST', Uri.parse(baseUrl));
+
+      // Use _userName or a default userId before full auth
+      final String defaultUserId = "default_user";
+      request.fields['userId'] = _userName ?? defaultUserId;
+
       request.fields['name'] = _userName ?? '';
       request.fields['skinType'] = skinType;
       request.fields['age'] = age.toString();
       request.fields['allergyType'] = allergyType;
 
-      request.files.add(await http.MultipartFile.fromPath('avatar', _avatarImage!.path));
+      request.files.add(
+        await http.MultipartFile.fromPath('avatar', _avatarImage!.path),
+      );
 
       var response = await request.send();
 
@@ -156,7 +163,8 @@ class _ProfileViewState extends State<ProfileView> {
                           child: Align(
                             alignment: Alignment.topLeft,
                             child: IconButton(
-                              icon: Icon(Icons.arrow_back, color: AppColors.greyDark),
+                              icon: Icon(Icons.arrow_back,
+                                  color: AppColors.greyDark),
                               onPressed: () => Navigator.pop(context),
                             ),
                           ),
@@ -325,8 +333,7 @@ class _ProfileViewState extends State<ProfileView> {
                               radius: 55,
                               backgroundImage: _avatarImage != null
                                   ? FileImage(_avatarImage!)
-                                  : AssetImage(AppAssets.logoPng)
-                              as ImageProvider,
+                                  : AssetImage(AppAssets.logoPng) as ImageProvider,
                             ),
                           ),
                           Positioned(
