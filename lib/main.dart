@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'views/home_view.dart';
 import 'views/contact_view.dart';
-import 'views/blog_view.dart';
 import 'views/profile_view.dart';
-import 'widgets/top_bar.dart';
 import 'widgets/bottom_bar.dart';
 
 void main() {
@@ -21,7 +19,6 @@ class _MyAppState extends State<MyApp> {
   final List<Widget> _pages = [
     HomeView(),
     ContactView(),
-    BlogView(),
     ProfileView(),
   ];
 
@@ -35,6 +32,7 @@ class _MyAppState extends State<MyApp> {
       title: 'My App',
       debugShowCheckedModeBanner: false,
       home: Scaffold(
+        backgroundColor: Color(0xFFE1EDD2), // Green pastel background
         // appBar: TopBar(title: _getTitle(_selectedIndex)),
         body: _pages[_selectedIndex],
         bottomNavigationBar: BottomBar(
