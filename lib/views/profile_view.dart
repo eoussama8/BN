@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import '../utils/contants.dart';
+import '../utils/contants.dart'; // Keep your AppColors, AppAssets here
 
 class ProfileView extends StatefulWidget {
   @override
@@ -11,59 +12,124 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
-  File? _avatarImage;
+  File? _avatarImageFile;
+  XFile? _avatarImageXFile;
   final ImagePicker _picker = ImagePicker();
 
-  String? _userName; // nom de l’utilisateur dynamique
+  String? _userName;
   String skinType = "Choose your skin type";
   String allergyType = "Choose your allergy type";
   int age = 18;
   bool _isSaving = false;
-
-  final String baseUrl = "http://10.0.2.2:3000/api/profile";
+  String? avatarUrl;
+  bool _isExistingProfile = false;
+  late final String baseUrl;
 
   @override
   void initState() {
     super.initState();
+    // Fix for Android emulator (localhost redirect)
+    if (!kIsWeb && Platform.isAndroid) {
+      baseUrl = "http://10.0.2.2:3000/api/profiles/";
+    } else {
+      baseUrl = "http://localhost:3000/api/profiles/";
+    }
     _loadUserProfile();
   }
-
   Future<void> _loadUserProfile() async {
     try {
-      var response = await http.get(Uri.parse(baseUrl));
+      const userId = "default_user";
+      final uri = Uri.parse("$baseUrl?userId=$userId");
+      final response = await http.get(uri);
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+
         setState(() {
-          _userName = data['name'] ?? '';
-          skinType = data['skinType'] ?? skinType;
-          allergyType = data['allergyType'] ?? allergyType;
-          age = data['age'] ?? age;
-          // Optionnel : charger avatar depuis URL si nécessaire
+          _isExistingProfile = true; // ✅ profile exists
+          _userName = data['userId'] ?? '';
+          skinType = data['skinType'] ?? "Choose your skin type";
+          allergyType = data['allergyType'] ?? "Choose your allergy type";
+          age = data['age'] ?? 18;
+          avatarUrl = data['avatar'] != null
+              ? "http://localhost:3000/${data['avatar']}"
+              : null;
         });
+      } else if (response.statusCode == 404) {
+        setState(() => _isExistingProfile = false); // ✅ no profile
       } else {
-        print("Erreur lors du chargement du profil: ${response.statusCode}");
+        _showSnackBar("Error loading profile: ${response.statusCode}", AppColors.red);
       }
     } catch (e) {
-      print("Erreur: $e");
+      print("Error loading profile: $e");
+      _showSnackBar("Error loading profile", AppColors.red);
     }
   }
+
 
   Future<void> _pickImageFromGallery() async {
     try {
       final XFile? pickedFile =
       await _picker.pickImage(source: ImageSource.gallery);
       if (pickedFile != null) {
-        setState(() => _avatarImage = File(pickedFile.path));
+        setState(() {
+          _avatarImageXFile = pickedFile;
+          if (!kIsWeb) {
+            _avatarImageFile = File(pickedFile.path);
+          }
+        });
       } else {
         _showSnackBar("No image selected", AppColors.red);
       }
     } catch (e) {
-      _showSnackBar("Failed to pick image", AppColors.red);
+      _showSnackBar("Failed to pick image: $e", AppColors.red);
     }
   }
 
+  Future<void> _updateProfile() async {
+    setState(() => _isSaving = true);
+    try {
+      var request = http.MultipartRequest('PUT', Uri.parse(baseUrl));
+      request.fields['userId'] = _userName ?? "default_user";
+      request.fields['skinType'] = skinType;
+      request.fields['age'] = age.toString();
+      request.fields['allergyType'] = allergyType;
+
+      // Attach avatar
+      if (kIsWeb) {
+        if (_avatarImageXFile != null) {
+          final bytes = await _avatarImageXFile!.readAsBytes();
+          request.files.add(http.MultipartFile.fromBytes(
+            'avatar',
+            bytes,
+            filename: _avatarImageXFile!.name,
+          ));
+        }
+      } else if (_avatarImageFile != null) {
+        request.files.add(await http.MultipartFile.fromPath('avatar', _avatarImageFile!.path));
+      }
+
+      final response = await request.send();
+      final respStr = await response.stream.bytesToString();
+
+      if (response.statusCode == 200) {
+        _showSnackBar("✅ Profile updated successfully!", AppColors.greenDark);
+        _loadUserProfile(); // refresh UI
+      } else {
+        _showSnackBar("❌ Failed to update profile", AppColors.red);
+        print("Error: ${response.statusCode}, $respStr");
+      }
+    } catch (e) {
+      print("Update error: $e");
+      _showSnackBar("Error updating profile", AppColors.red);
+    } finally {
+      setState(() => _isSaving = false);
+    }
+  }
+
+
   Future<void> _saveProfile() async {
-    if (_avatarImage == null) {
+    if (_avatarImageXFile == null && avatarUrl == null) {
       _showSnackBar("Please upload an image first", AppColors.red);
       return;
     }
@@ -80,30 +146,40 @@ class _ProfileViewState extends State<ProfileView> {
 
     try {
       var request = http.MultipartRequest('POST', Uri.parse(baseUrl));
-
-      // Use _userName or a default userId before full auth
-      final String defaultUserId = "default_user";
-      request.fields['userId'] = _userName ?? defaultUserId;
-
-      request.fields['name'] = _userName ?? '';
+      request.fields['userId'] = _userName ?? "default_user";
       request.fields['skinType'] = skinType;
       request.fields['age'] = age.toString();
       request.fields['allergyType'] = allergyType;
 
-      request.files.add(
-        await http.MultipartFile.fromPath('avatar', _avatarImage!.path),
-      );
+      // Attach avatar
+      if (_avatarImageXFile != null) {
+        if (kIsWeb) {
+          final bytes = await _avatarImageXFile!.readAsBytes();
+          request.files.add(http.MultipartFile.fromBytes(
+            'avatar',
+            bytes,
+            filename: _avatarImageXFile!.name,
+          ));
+        } else {
+          request.files.add(await http.MultipartFile.fromPath(
+            'avatar',
+            _avatarImageFile!.path,
+          ));
+        }
+      }
 
       var response = await request.send();
+      final respStr = await response.stream.bytesToString();
+      print("Save response: ${response.statusCode} $respStr");
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         _showSnackBar("✅ Profile saved successfully!", AppColors.greenDark);
+        await _loadUserProfile(); // Refresh UI with new data
       } else {
         _showSnackBar("❌ Failed to save profile", AppColors.red);
-        print("Error: ${response.statusCode}");
       }
     } catch (e) {
-      _showSnackBar("Something went wrong", AppColors.red);
+      _showSnackBar("Something went wrong: $e", AppColors.red);
       print("Exception: $e");
     } finally {
       setState(() => _isSaving = false);
@@ -127,7 +203,6 @@ class _ProfileViewState extends State<ProfileView> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header
             Container(
               height: 100,
               padding: EdgeInsets.only(top: 16),
@@ -142,11 +217,9 @@ class _ProfileViewState extends State<ProfileView> {
                 ),
               ),
             ),
-
             Expanded(
               child: Stack(
                 children: [
-                  // Content card
                   Container(
                     margin: EdgeInsets.only(top: 60),
                     decoration: BoxDecoration(
@@ -183,9 +256,7 @@ class _ProfileViewState extends State<ProfileView> {
                                     color: AppColors.black,
                                   ),
                                 ),
-
                                 SizedBox(height: 40),
-
                                 _buildDropdownField(
                                   label: 'SKIN TYPE',
                                   value: skinType,
@@ -199,9 +270,7 @@ class _ProfileViewState extends State<ProfileView> {
                                   onChanged: (value) =>
                                       setState(() => skinType = value!),
                                 ),
-
                                 SizedBox(height: 24),
-
                                 _buildDropdownField(
                                   label: 'ALLERGY TYPE',
                                   value: allergyType,
@@ -215,9 +284,7 @@ class _ProfileViewState extends State<ProfileView> {
                                   onChanged: (value) =>
                                       setState(() => allergyType = value!),
                                 ),
-
                                 SizedBox(height: 24),
-
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -233,7 +300,8 @@ class _ProfileViewState extends State<ProfileView> {
                                     Container(
                                       decoration: BoxDecoration(
                                         color: AppColors.white,
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius:
+                                        BorderRadius.circular(12),
                                       ),
                                       padding:
                                       EdgeInsets.symmetric(horizontal: 16),
@@ -245,7 +313,8 @@ class _ProfileViewState extends State<ProfileView> {
                                             icon: Icon(Icons.remove,
                                                 color: AppColors.greyMedium),
                                             onPressed: () {
-                                              if (age > 1) setState(() => age--);
+                                              if (age > 1)
+                                                setState(() => age--);
                                             },
                                           ),
                                           Text(
@@ -260,7 +329,8 @@ class _ProfileViewState extends State<ProfileView> {
                                             icon: Icon(Icons.add,
                                                 color: AppColors.greyMedium),
                                             onPressed: () {
-                                              if (age < 120) setState(() => age++);
+                                              if (age < 120)
+                                                setState(() => age++);
                                             },
                                           ),
                                         ],
@@ -268,19 +338,22 @@ class _ProfileViewState extends State<ProfileView> {
                                     ),
                                   ],
                                 ),
-
                                 SizedBox(height: 40),
-
                                 SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton(
-                                    onPressed: _isSaving ? null : _saveProfile,
-                                    style: ElevatedButton.styleFrom(
+                                    onPressed: _isSaving
+                                        ? null
+                                        : _isExistingProfile
+                                        ? _updateProfile
+                                        : _saveProfile,
+                                      style: ElevatedButton.styleFrom(
                                       backgroundColor: AppColors.greyDark,
                                       padding:
                                       EdgeInsets.symmetric(vertical: 16),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius:
+                                        BorderRadius.circular(12),
                                       ),
                                     ),
                                     child: _isSaving
@@ -299,14 +372,16 @@ class _ProfileViewState extends State<ProfileView> {
                                         Icon(Icons.download,
                                             color: AppColors.white),
                                         SizedBox(width: 8),
-                                        Text(
-                                          'Save',
-                                          style: TextStyle(
-                                            color: AppColors.white,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
+                                    Text(
+                                      _isExistingProfile ? 'Modify' : 'Save',
+                                      style: TextStyle(
+                                        color: AppColors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+
+
                                       ],
                                     ),
                                   ),
@@ -318,7 +393,7 @@ class _ProfileViewState extends State<ProfileView> {
                       ],
                     ),
                   ),
-
+                  // Avatar section
                   Positioned(
                     top: 0,
                     left: 0,
@@ -331,9 +406,14 @@ class _ProfileViewState extends State<ProfileView> {
                             backgroundColor: AppColors.greenPastel,
                             child: CircleAvatar(
                               radius: 55,
-                              backgroundImage: _avatarImage != null
-                                  ? FileImage(_avatarImage!)
-                                  : AssetImage(AppAssets.logoPng) as ImageProvider,
+                              backgroundImage: _avatarImageXFile != null
+                                  ? (kIsWeb
+                                  ? NetworkImage(_avatarImageXFile!.path)
+                                  : FileImage(_avatarImageFile!) as ImageProvider)
+                                  : (avatarUrl != null
+                                  ? NetworkImage(avatarUrl!)
+                                  : const AssetImage("assets/logo.png")),
+
                             ),
                           ),
                           Positioned(
@@ -344,11 +424,8 @@ class _ProfileViewState extends State<ProfileView> {
                               child: CircleAvatar(
                                 radius: 18,
                                 backgroundColor: AppColors.greyDark,
-                                child: Icon(
-                                  Icons.camera_alt,
-                                  color: AppColors.white,
-                                  size: 20,
-                                ),
+                                child: Icon(Icons.camera_alt,
+                                    color: AppColors.white, size: 20),
                               ),
                             ),
                           ),
@@ -374,14 +451,11 @@ class _ProfileViewState extends State<ProfileView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-            color: AppColors.black,
-          ),
-        ),
+        Text(label,
+            style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                color: AppColors.black)),
         SizedBox(height: 8),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16),
@@ -393,11 +467,9 @@ class _ProfileViewState extends State<ProfileView> {
             value: value,
             isExpanded: true,
             underline: SizedBox(),
-            icon: Icon(Icons.keyboard_arrow_down, color: AppColors.greyMedium),
-            style: TextStyle(
-              color: AppColors.greyDark,
-              fontSize: 14,
-            ),
+            icon:
+            Icon(Icons.keyboard_arrow_down, color: AppColors.greyMedium),
+            style: TextStyle(color: AppColors.greyDark, fontSize: 14),
             onChanged: onChanged,
             items: items
                 .map((e) => DropdownMenuItem(
