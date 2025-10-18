@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 
 class AppAssets {
+  // Images
   static const String logoPng = 'assets/images/logo.png';
+
+
+  static const String background = 'assets/icons/background.svg';
+  static const String background2 = 'assets/icons/background2.svg';
+  // Icons
+  static const String iconHome = 'assets/icons/home.svg';
+  static const String iconMenu = 'assets/icons/menu.svg';
+  static const String iconProfile = 'assets/icons/profile.svg';
 }
 
 class AppColors {
@@ -9,7 +18,9 @@ class AppColors {
   static const Color white = Color(0xFFFFFFFF);
   static const Color greyDark = Color(0xFF33363F);
   static const Color greyMedium = Color(0xFF757575);
+  static const Color greyTitle = Color(0xFF434343);
   static const Color greyMedium70 = Color(0xB2757575); // 70% opacity
+  static const Color greyLight = Color(0xFF5A5A5A);
   static const Color greenPastel = Color(0xFFE1EDD2);
   static const Color greenDark = Color(0xFF67815A);
   static const Color green1 = Color(0xFF97A087);

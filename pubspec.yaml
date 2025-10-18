@@ -35,6 +35,8 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   http: ^1.5.0
+  flutter_svg: ^2.0.10+1
+
 
 
 dev_dependencies:
@@ -53,6 +55,8 @@ dev_dependencies:
   shared_preferences: ^2.3.3
 
 
+
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -67,7 +71,11 @@ flutter:
 
   assets:
     - assets/images/logo.png
-    - assets/icons/logo.svg
+    - assets/icons/home.svg
+    - assets/icons/menu.svg
+    - assets/icons/profile.svg
+    - assets/icons/background.svg
+    - assets/icons/background2.svg
 
 
 flutter_native_splash:
