@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/profile_model.dart';
 import '../presenters/profile_presenter.dart';
@@ -117,7 +118,7 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.green2,
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: Column(
           children: [
@@ -138,17 +139,43 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
 
   Widget _buildHeader() {
     return Container(
-      height: 100,
-      padding: EdgeInsets.only(top: 16),
-      child: Center(
-        child: Text(
-          'Profile',
-          style: TextStyle(
-            color: AppColors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+      height: 80,
+      padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Centered title
+          Align(
+            alignment: Alignment.center,
+            child: Text(
+              'Profile',
+              style: TextStyle(
+                color: AppColors.black,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
-        ),
+
+          // Menu icon top-left
+          Align(
+            alignment: Alignment.topLeft,
+            child: GestureDetector(
+              onTap: () {
+                // Replace with your drawer logic if needed
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Menu tapped")),
+                );
+              },
+              child: SvgPicture.asset(
+                'assets/icons/menu.svg', // make sure you have this asset
+                width: 24,
+                height: 24,
+                color: AppColors.black,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -165,21 +192,12 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
       ),
       child: Column(
         children: [
-          Padding(
-            padding: EdgeInsets.only(left: 8, top: 12),
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: AppColors.greyDark),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-          ),
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.only(left: 24, right: 24, top: 40, bottom: 24),
               child: Column(
                 children: [
+                  SizedBox(height: 40),
                   Text(
                     'Hello, ${_userName ?? ''}',
                     style: TextStyle(
@@ -246,7 +264,7 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
                     : FileImage(_avatarImageFile!) as ImageProvider)
                     : (_avatarUrl != null
                     ? NetworkImage(_avatarUrl!)
-                    : const AssetImage("assets/logo.png")),
+                    : const AssetImage("assets/images/placeholder.png")),
               ),
             ),
             Positioned(

@@ -37,7 +37,8 @@ class ProfilePresenter {
   /// ======================================
   /// Load user profile from backend
   /// ======================================
-  Future<void> loadProfile({String userId = "default_user"}) async {
+  Future<void> loadProfile({String userId = "default_user"}) async
+  {
     try {
       final uri = Uri.parse("$baseUrl?userId=$userId");
       final response = await http.get(uri);
@@ -66,7 +67,8 @@ class ProfilePresenter {
   /// ======================================
   /// Pick image from gallery
   /// ======================================
-  Future<XFile?> pickImageFromGallery() async {
+  Future<XFile?> pickImageFromGallery() async
+  {
     try {
       final XFile? pickedFile =
       await _picker.pickImage(source: ImageSource.gallery);
@@ -89,7 +91,8 @@ class ProfilePresenter {
     required Profile profile,
     XFile? avatarXFile,
     File? avatarFile,
-  }) async {
+  })
+  async {
     // === VALIDATION ===
     if (avatarXFile == null && avatarFile == null) {
       view.showError("Please upload an image first");
@@ -159,7 +162,8 @@ class ProfilePresenter {
     required Profile profile,
     XFile? avatarXFile,
     File? avatarFile,
-  }) async {
+  }) async
+  {
     // === VALIDATION before update ===
     if (profile.age < 13) {
       view.showError("You must be at least 13 years old");
@@ -215,7 +219,8 @@ class ProfilePresenter {
   /// ======================================
   /// Delete profile
   /// ======================================
-  Future<void> deleteProfile(String userId) async {
+  Future<void> deleteProfile(String userId) async
+  {
     try {
       final response = await http.delete(Uri.parse("$baseUrl/$userId"));
 
