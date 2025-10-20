@@ -77,6 +77,8 @@ flutter:
     - assets/icons/profile.svg
     - assets/icons/background.svg
     - assets/icons/background2.svg
+    - assets/icons/camera.svg
+    - assets/icons/settings.svg
 
 
 flutter_native_splash:

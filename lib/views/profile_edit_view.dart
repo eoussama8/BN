@@ -1,57 +1,54 @@
 import 'dart:io';
+import 'package:beaute_naturelle_ia/views/profile_summary_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/profile_model.dart';
 import '../presenters/profile_presenter.dart';
 import '../utils/contants.dart';
-import 'profile_summary_view.dart';
 
-class ProfileView extends StatefulWidget {
-  const ProfileView({super.key});
+class ProfileEditView extends StatefulWidget {
+  final Profile profile;
+  final String? avatarUrl;
+
+  const ProfileEditView({Key? key, required this.profile, this.avatarUrl})
+      : super(key: key);
 
   @override
-  _ProfileViewState createState() => _ProfileViewState();
+  _ProfileEditViewState createState() => _ProfileEditViewState();
 }
 
-class _ProfileViewState extends State<ProfileView>
+class _ProfileEditViewState extends State<ProfileEditView>
     implements ProfileViewContract {
   late ProfilePresenter _presenter;
 
-  // UI state
   File? _avatarImageFile;
   XFile? _avatarImageXFile;
   String? _userName;
   String? _avatarUrl;
-  String _skinType = "Choose your skin type";
-  String _allergyType = "Choose your allergy type";
-  int _age = 18;
+  String _skinType = "";
+  String _allergyType = "";
+  int _age = 0;
   bool _isSaving = false;
-  bool _isExistingProfile = false;
-  Profile? _profileData;
 
   @override
   void initState() {
     super.initState();
     _presenter = ProfilePresenter(this);
-    _presenter.loadProfile();
+
+    // Initialize fields with existing data
+    final profile = widget.profile;
+    _userName = profile.userId;
+    _skinType = profile.skinType;
+    _allergyType = profile.allergyType;
+    _age = profile.age;
+    _avatarUrl = widget.avatarUrl;
   }
 
-  // ========== ProfileViewContract ==========
-
+  // ========== Contract ==========
   @override
-  void showProfile(Profile profile, String? avatarUrl) {
-    setState(() {
-      _profileData = profile;
-      _userName = profile.userId;
-      _skinType = profile.skinType;
-      _allergyType = profile.allergyType;
-      _age = profile.age;
-      _avatarUrl = avatarUrl;
-      _isExistingProfile = true;
-    });
-  }
+  void showProfile(Profile profile, String? avatarUrl) {}
 
   @override
   void showError(String message) {
@@ -69,11 +66,9 @@ class _ProfileViewState extends State<ProfileView>
   }
 
   @override
-  void updateProfileExistsState(bool exists) {
-    setState(() => _isExistingProfile = exists);
-  }
+  void updateProfileExistsState(bool exists) {}
 
-  // ========== Image Picker ==========
+  // ========== Functions ==========
 
   Future<void> _pickImageFromGallery() async {
     final pickedFile = await _presenter.pickImageFromGallery();
@@ -87,37 +82,31 @@ class _ProfileViewState extends State<ProfileView>
     }
   }
 
-  // ========== Save or Update ==========
-
-  void _onSaveOrUpdate() async {
-    final profile = Profile(
+  void _onSaveChanges() async {
+    final updatedProfile = Profile(
       userId: _userName ?? "default_user",
       skinType: _skinType,
       allergyType: _allergyType,
       age: _age,
     );
 
-    if (_isExistingProfile) {
-      await _presenter.updateProfile(
-        profile: profile,
-        avatarXFile: _avatarImageXFile,
-        avatarFile: _avatarImageFile,
-      );
-    } else {
-      await _presenter.saveProfile(
-        profile: profile,
-        avatarXFile: _avatarImageXFile,
-        avatarFile: _avatarImageFile,
-      );
-    }
+    await _presenter.updateProfile(
+      profile: updatedProfile,
+      avatarXFile: _avatarImageXFile,
+      avatarFile: _avatarImageFile,
+    );
 
-    setState(() {
-      _profileData = profile;
-      _isExistingProfile = true;
-    });
+    // Go back to summary
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProfileSummaryView(
+          profile: updatedProfile,
+          avatarUrl: _avatarUrl,
+        ),
+      ),
+    );
   }
-
-  // ========== SnackBar ==========
 
   void _showSnackBar(String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -133,27 +122,22 @@ class _ProfileViewState extends State<ProfileView>
 
   @override
   Widget build(BuildContext context) {
-    // If profile exists, show summary instead
-    if (_isExistingProfile && _profileData != null) {
-      return ProfileSummaryView(
-        profile: _profileData!,
-        avatarUrl: _avatarUrl,
-      );
-    }
-
-    return SafeArea(
-      child: Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: Stack(
-              children: [
-                _buildMainContent(),
-                _buildAvatarSection(),
-              ],
+    return Scaffold(
+      backgroundColor: AppColors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(),
+            Expanded(
+              child: Stack(
+                children: [
+                  _buildMainContent(),
+                  _buildAvatarSection(),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -168,7 +152,7 @@ class _ProfileViewState extends State<ProfileView>
           Align(
             alignment: Alignment.center,
             child: Text(
-              'Profile',
+              'Edit Profile',
               style: TextStyle(
                 color: AppColors.black,
                 fontSize: 24,
@@ -179,17 +163,8 @@ class _ProfileViewState extends State<ProfileView>
           Align(
             alignment: Alignment.topLeft,
             child: GestureDetector(
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Menu tapped")),
-                );
-              },
-              child: SvgPicture.asset(
-                'assets/icons/menu.svg',
-                width: 24,
-                height: 24,
-                color: AppColors.black,
-              ),
+              onTap: () => Navigator.pop(context),
+              child: Icon(Icons.arrow_back, color: AppColors.black),
             ),
           ),
         ],
@@ -199,59 +174,63 @@ class _ProfileViewState extends State<ProfileView>
 
   Widget _buildMainContent() {
     return Container(
-      margin: const EdgeInsets.only(top: 60),
+      margin: EdgeInsets.only(top: 60),
       decoration: BoxDecoration(
         color: AppColors.greenPastel,
-        borderRadius: const BorderRadius.only(
+        borderRadius: BorderRadius.only(
           topLeft: Radius.elliptical(40, 30),
           topRight: Radius.elliptical(40, 30),
         ),
       ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-        child: Column(
-          children: [
-            const SizedBox(height: 40),
-            Text(
-              'Hello, ${_userName ?? ''}',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.black,
+      child: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+              child: Column(
+                children: [
+                  SizedBox(height: 40),
+                  Text(
+                    'Hello, ${_userName ?? ''}',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.black,
+                    ),
+                  ),
+                  SizedBox(height: 40),
+                  _buildDropdownField(
+                    label: 'SKIN TYPE',
+                    value: _skinType,
+                    items: [
+                      "Normal",
+                      "Dry",
+                      "Oily",
+                      "Combination"
+                    ],
+                    onChanged: (v) => setState(() => _skinType = v!),
+                  ),
+                  SizedBox(height: 24),
+                  _buildDropdownField(
+                    label: 'ALLERGY TYPE',
+                    value: _allergyType,
+                    items: [
+                      "None",
+                      "Pollen",
+                      "Dust",
+                      "Food"
+                    ],
+                    onChanged: (v) => setState(() => _allergyType = v!),
+                  ),
+                  SizedBox(height: 24),
+                  _buildAgeSelector(),
+                  SizedBox(height: 40),
+                  _buildSaveButton(),
+                ],
               ),
             ),
-            const SizedBox(height: 40),
-            _buildDropdownField(
-              label: 'SKIN TYPE',
-              value: _skinType,
-              items: [
-                "Choose your skin type",
-                "Normal",
-                "Dry",
-                "Oily",
-                "Combination"
-              ],
-              onChanged: (v) => setState(() => _skinType = v!),
-            ),
-            const SizedBox(height: 24),
-            _buildDropdownField(
-              label: 'ALLERGY TYPE',
-              value: _allergyType,
-              items: [
-                "Choose your allergy type",
-                "None",
-                "Pollen",
-                "Dust",
-                "Food"
-              ],
-              onChanged: (v) => setState(() => _allergyType = v!),
-            ),
-            const SizedBox(height: 24),
-            _buildAgeSelector(),
-            const SizedBox(height: 40),
-            _buildSaveButton(),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -286,8 +265,8 @@ class _ProfileViewState extends State<ProfileView>
                 child: CircleAvatar(
                   radius: 18,
                   backgroundColor: AppColors.greyDark,
-                  child:
-                  Icon(Icons.camera_alt, color: AppColors.white, size: 20),
+                  child: Icon(Icons.camera_alt,
+                      color: AppColors.white, size: 20),
                 ),
               ),
             ),
@@ -306,13 +285,13 @@ class _ProfileViewState extends State<ProfileView>
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
                 color: AppColors.black)),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(12),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -344,34 +323,22 @@ class _ProfileViewState extends State<ProfileView>
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: _isSaving ? null : _onSaveOrUpdate,
+        onPressed: _isSaving ? null : _onSaveChanges,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.greyDark,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          padding: EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
         child: _isSaving
-            ? const SizedBox(
-          height: 24,
-          width: 24,
-          child:
-          CircularProgressIndicator(color: AppColors.white, strokeWidth: 2),
-        )
-            : Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.download, color: AppColors.white),
-            const SizedBox(width: 8),
-            Text(
-              _isExistingProfile ? 'Modify' : 'Save',
-              style: const TextStyle(
-                color: AppColors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
+            ? CircularProgressIndicator(color: AppColors.white)
+            : Text(
+          'Save Changes',
+          style: TextStyle(
+              color: AppColors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w600),
         ),
       ),
     );
@@ -391,9 +358,9 @@ class _ProfileViewState extends State<ProfileView>
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
                 color: AppColors.black)),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(12),
@@ -401,12 +368,16 @@ class _ProfileViewState extends State<ProfileView>
           child: DropdownButton<String>(
             value: value,
             isExpanded: true,
-            underline: const SizedBox(),
-            icon: Icon(Icons.keyboard_arrow_down, color: AppColors.greyMedium),
+            underline: SizedBox(),
+            icon: Icon(Icons.keyboard_arrow_down,
+                color: AppColors.greyMedium),
             style: TextStyle(color: AppColors.greyDark, fontSize: 14),
             onChanged: onChanged,
             items: items
-                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                .map((e) => DropdownMenuItem(
+              value: e,
+              child: Text(e),
+            ))
                 .toList(),
           ),
         ),

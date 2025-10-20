@@ -1,12 +1,17 @@
-// contact_view.dart
 import 'package:flutter/material.dart';
-import '../widgets/top_bar.dart';
 
 class ContactView extends StatelessWidget {
+  const ContactView({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(child: Text('Contact Page')),
+    return const Scaffold(
+      body: Center(
+        child: Text(
+          'Contact Page',
+          style: TextStyle(fontSize: 18),
+        ),
+      ),
     );
   }
 }
