@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'app_text_styles.dart';
-import 'contants.dart';
+import 'constants.dart';
 
 class AppInputField extends StatelessWidget {
   final String hintText;

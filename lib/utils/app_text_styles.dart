@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'contants.dart';
+import 'constants.dart';
 
 class AppTextStyles {
   static const TextStyle button = TextStyle(

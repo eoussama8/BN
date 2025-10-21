@@ -6,7 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/profile_model.dart';
 import '../presenters/profile_presenter.dart';
-import '../utils/contants.dart';
+import '../utils/constants.dart';
 
 class ProfileEditView extends StatefulWidget {
   final Profile profile;

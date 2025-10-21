@@ -72,21 +72,24 @@ flutter:
   assets:
     - assets/images/logo.png
     - assets/images/placeholder.png
-    - assets/icons/home.svg
+    - assets/images/icone-home.png
     - assets/icons/menu.svg
-    - assets/icons/profile.svg
+    - assets/images/icone-profil.png
+    - assets/images/icone-recette.svg
+    - assets/images/icone-passport.png
     - assets/icons/background.svg
     - assets/icons/background2.svg
     - assets/icons/camera.svg
     - assets/icons/settings.svg
     - assets/images/splash.png
+    - assets/images/splash1.png
 
 
 
 
 flutter_native_splash:
   color: "#ECECEC"
-  image: assets/images/splash.png
+  image: assets/images/splash1.png
 
   android: true
   ios: true

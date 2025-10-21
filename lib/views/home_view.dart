@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../utils/contants.dart';
+import '../utils/constants.dart';
 import '../widgets/top_bar.dart';
 import '../utils/app_text_styles.dart';
 import 'package:image_picker/image_picker.dart';
@@ -101,7 +101,7 @@ class HomeView extends StatelessWidget {
               child: Opacity(
                 opacity: 0.4,
                 child: SvgPicture.asset(
-                  'assets/icons/background.svg',
+                  AppAssets.background,
                   width: screenWidth * 0.6,
                   height: screenHeight * 0.7,
                   fit: BoxFit.fill,
@@ -112,14 +112,14 @@ class HomeView extends StatelessWidget {
 
             // Bottom left background SVG with padding
             Positioned(
-              bottom: 20, // padding from bottom
+              bottom: 80, // padding from bottom
               left: 20, // padding from left
               child: Opacity(
                 opacity: 0.4,
                 child: SvgPicture.asset(
-                  'assets/icons/background2.svg',
-                  width: screenWidth * 0.05,
-                  height: screenHeight * 0.05,
+                  AppAssets.background2,
+                  width: screenWidth * 0.07,
+                  height: screenHeight * 0.07,
                   fit: BoxFit.fill,
                   alignment: Alignment.bottomLeft,
                 ),

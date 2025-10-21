@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'views/home_view.dart';
 import 'views/contact_view.dart';
 import 'views/profile_view.dart';
-import 'widgets/bottom_bar.dart';
+import 'widgets/bottom_nav_bar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,17 +16,19 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  int _selectedIndex = 0;
+  // Keep track of selected page by name
+  String _selectedNav = "Home";
 
-  final List<Widget> _pages = const [
-    HomeView(),
-    ContactView(),
-    ProfileView(),
-  ];
+  // Map labels to pages
+  final Map<String, Widget> _pages = {
+    "Home": const HomeView(),
+    "Contact": const ContactView(),
+    "Profile": const ProfileView(),
+  };
 
-  void _onItemTapped(int index) {
+  void _onNavChange(String label) {
     setState(() {
-      _selectedIndex = index;
+      _selectedNav = label;
     });
   }
 
@@ -36,19 +38,16 @@ class _MyAppState extends State<MyApp> {
       title: 'My App',
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        // ✅ Don’t color the scaffold; let screens define their own background
+        extendBody: true,
         backgroundColor: Colors.transparent,
 
-        // ✅ Makes the bottom bar float a bit on top of the body
-        extendBody: true,
+        // Show the active page
+        body: _pages[_selectedNav] ?? const SizedBox(),
 
-        // ✅ The active page (takes full screen)
-        body: _pages[_selectedIndex],
-
-        // ✅ Custom bottom bar
-        bottomNavigationBar: BottomBar(
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
+        // Custom BottomNavBar
+        bottomNavigationBar: BottomNavBar(
+          selectedNav: _selectedNav,
+          onNavChange: _onNavChange,
         ),
       ),
     );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../models/profile_model.dart';
-import '../utils/contants.dart';
+import '../utils/constants.dart';
 import 'profile_edit_view.dart';
 
 class ProfileSummaryView extends StatelessWidget {
@@ -55,17 +55,41 @@ class ProfileSummaryView extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildHeaderCard(context),
-            const SizedBox(height: 16),
-            _buildDetailsCard(),
-          ],
-        ),
+
+      // 🌿 Background decorations behind content
+      body: Stack(
+        children: [
+          // Top-right background
+
+          // Bottom-left background
+          Positioned(
+            bottom: 80, // padding from bottom
+            left: 20, // padding from left
+            child: Opacity(
+              opacity: 0.4,
+              child: SvgPicture.asset(
+                AppAssets.background2,
+                width: screenWidth * 0.07,
+                height: screenHeight * 0.07,
+                fit: BoxFit.fill,
+                alignment: Alignment.bottomLeft,
+              ),
+            ),
+          ),
+
+          // 🧩 Main content
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                _buildHeaderCard(context),
+                const SizedBox(height: 16),
+                _buildDetailsCard(),
+              ],
+            ),
+          ),
+        ],
       ),
-      // bottom bar handled globally in main.dart
     );
   }
 
@@ -137,8 +161,6 @@ class ProfileSummaryView extends StatelessWidget {
               ],
             ),
           ),
-
-          // ✅ restored settings icon
           GestureDetector(
             onTap: () {
               Navigator.push(
@@ -155,13 +177,13 @@ class ProfileSummaryView extends StatelessWidget {
               width: 32,
               height: 32,
               padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.transparent,
                 shape: BoxShape.circle,
               ),
               child: SvgPicture.asset(
                 'assets/icons/settings.svg',
-                color: Colors.grey.shade700,
+                color: Colors.grey,
               ),
             ),
           ),
