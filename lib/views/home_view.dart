@@ -115,7 +115,7 @@ class HomeView extends StatelessWidget {
               bottom: 20, // padding from bottom
               left: 20, // padding from left
               child: Opacity(
-                opacity: 0.3,
+                opacity: 0.4,
                 child: SvgPicture.asset(
                   'assets/icons/background2.svg',
                   width: screenWidth * 0.05,
@@ -125,6 +125,8 @@ class HomeView extends StatelessWidget {
                 ),
               ),
             ),
+
+
           ],
         );
       },

@@ -97,15 +97,6 @@ class _ProfileEditViewState extends State<ProfileEditView>
     );
 
     // Go back to summary
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProfileSummaryView(
-          profile: updatedProfile,
-          avatarUrl: _avatarUrl,
-        ),
-      ),
-    );
   }
 
   void _showSnackBar(String message, Color color) {

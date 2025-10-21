@@ -133,7 +133,6 @@ class _ProfileViewState extends State<ProfileView>
 
   @override
   Widget build(BuildContext context) {
-    // If profile exists, show summary instead
     if (_isExistingProfile && _profileData != null) {
       return ProfileSummaryView(
         profile: _profileData!,
@@ -141,29 +140,45 @@ class _ProfileViewState extends State<ProfileView>
       );
     }
 
-    return SafeArea(
-      child: Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: Stack(
+    // ✅ Replace SafeArea + Column with this:
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      backgroundColor: AppColors.greenPastel,
+      body: SafeArea(
+        child: Container(
+          color: AppColors.white, // 👈 SafeArea background
+          child: SizedBox.expand(
+            child: Column(
               children: [
-                _buildMainContent(),
-                _buildAvatarSection(),
+                _buildHeader(),
+                Expanded(
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      _buildMainContent(),
+                      _buildAvatarSection(),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
+
   }
 
   Widget _buildHeader() {
+
     return Container(
+
       height: 80,
       padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
+
       child: Stack(
         alignment: Alignment.center,
+
         children: [
           Align(
             alignment: Alignment.center,

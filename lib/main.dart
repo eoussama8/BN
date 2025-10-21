@@ -1,4 +1,3 @@
-import 'package:beaute_naturelle_ia/utils/contants.dart';
 import 'package:flutter/material.dart';
 import 'views/home_view.dart';
 import 'views/contact_view.dart';
@@ -31,28 +30,22 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  Color _getBackgroundColor(int index) {
-    switch (index) {
-      case 0:
-      case 1:
-        return Colors.white;
-      case 2:
-        return AppColors.greenPastel;
-      default:
-        return Colors.white;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'My App',
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        backgroundColor: _getBackgroundColor(_selectedIndex),
-        body: SafeArea(
-          child: _pages[_selectedIndex],
-        ),
+        // ✅ Don’t color the scaffold; let screens define their own background
+        backgroundColor: Colors.transparent,
+
+        // ✅ Makes the bottom bar float a bit on top of the body
+        extendBody: true,
+
+        // ✅ The active page (takes full screen)
+        body: _pages[_selectedIndex],
+
+        // ✅ Custom bottom bar
         bottomNavigationBar: BottomBar(
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,

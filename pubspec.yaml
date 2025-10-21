@@ -79,11 +79,14 @@ flutter:
     - assets/icons/background2.svg
     - assets/icons/camera.svg
     - assets/icons/settings.svg
+    - assets/images/splash.png
+
+
 
 
 flutter_native_splash:
   color: "#ECECEC"
-  image: assets/images/logo.png
+  image: assets/images/splash.png
 
   android: true
   ios: true
@@ -92,7 +95,7 @@ flutter_native_splash:
   ios_content_mode: scaleAspectFit
 
   android_12:
-    image: assets/images/logo.png
+    image: assets/images/splash.png
     icon_background_color: "#ECECEC"
     android_gravity: center
 
