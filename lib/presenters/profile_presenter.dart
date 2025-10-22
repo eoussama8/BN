@@ -1,8 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/profile_model.dart';
 
 /// ================================
@@ -23,77 +27,119 @@ class ProfilePresenter {
   final ProfileViewContract view;
   final String baseUrl;
   final ImagePicker _picker = ImagePicker();
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   ProfilePresenter(this.view) : baseUrl = _getBaseUrl();
 
-  /// Determine base URL depending on platform
+  /// Base URL dépend de la plateforme
   static String _getBaseUrl() {
     if (!kIsWeb && Platform.isAndroid) {
-      return "http://10.0.2.2:3000/api/profiles"; // Android emulator
+      return "http://10.0.2.2:3000/api/profiles"; // Android Emulator
     }
     return "http://localhost:3000/api/profiles"; // Web/Desktop
   }
 
-  /// ======================================
-  /// Load user profile from backend
-  /// ======================================
-  Future<void> loadProfile({String userId = "default_user"}) async
-  {
+  /// ================================
+  /// 🔒 STOCKAGE CHIFFRÉ DU USER ID
+  /// ================================
+  Future<void> saveUserIdSecurely(String userId) async {
+    await _secureStorage.write(key: 'userId', value: userId);
+  }
+
+  Future<String?> getUserIdSecurely() async {
+    return await _secureStorage.read(key: 'userId');
+  }
+
+  Future<void> clearUserData() async {
+    await _secureStorage.deleteAll();
+  }
+
+  /// ================================
+  /// 🔄 CHARGER LE PROFIL
+  /// ================================
+  Future<void> loadProfile({String? userId}) async {
     try {
+      // Charger userId depuis le stockage sécurisé si non fourni
+      userId ??= await getUserIdSecurely() ?? "default_user";
+
       final uri = Uri.parse("$baseUrl?userId=$userId");
       final response = await http.get(uri);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final profile = Profile.fromJson(data);
-
         final avatarUrl = data['avatar'] != null
             ? "http://localhost:3000/${data['avatar']}"
             : null;
 
         view.updateProfileExistsState(true);
         view.showProfile(profile, avatarUrl);
+
+        // Sauvegarde automatique du userId
+        await saveUserIdSecurely(userId);
       } else if (response.statusCode == 404) {
         view.updateProfileExistsState(false);
       } else {
         view.showError("Error loading profile: ${response.statusCode}");
       }
     } catch (e) {
-      print("Error loading profile: $e");
-      view.showError("Error loading profile");
+      view.showError("Error loading profile: $e");
     }
   }
 
-  /// ======================================
-  /// Pick image from gallery
-  /// ======================================
-  Future<XFile?> pickImageFromGallery() async
-  {
+  /// ================================
+  /// 🖼️ PICK IMAGE (avec compression de base)
+  /// ================================
+  Future<XFile?> pickImageFromGallery() async {
     try {
-      final XFile? pickedFile =
-      await _picker.pickImage(source: ImageSource.gallery);
-      if (pickedFile != null) {
-        return pickedFile;
-      } else {
-        view.showError("No image selected");
-        return null;
-      }
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+      return pickedFile;
     } catch (e) {
       view.showError("Failed to pick image: $e");
       return null;
     }
   }
 
-  /// ======================================
-  /// Save a NEW profile (with validation)
-  /// ======================================
+  /// ================================
+  /// 🗜️ COMPRESSION DES IMAGES
+  /// ================================
+  Future<File?> _compressFile(File file) async {
+    final targetPath =
+        "${file.parent.path}/compressed_${file.uri.pathSegments.last}";
+
+    final compressedXFile = await FlutterImageCompress.compressAndGetFile(
+      file.path,
+      targetPath,
+      quality: 70,
+      minWidth: 800,
+      minHeight: 800,
+    );
+
+    // Convertir XFile → File
+    return compressedXFile != null ? File(compressedXFile.path) : null;
+  }
+
+  Future<Uint8List> _compressWebImage(XFile file) async {
+    final bytes = await file.readAsBytes();
+    final decoded = img.decodeImage(bytes);
+    if (decoded == null) return bytes;
+    final compressed = img.encodeJpg(decoded, quality: 70);
+    return Uint8List.fromList(compressed);
+  }
+
+  /// ================================
+  /// 💾 SAUVEGARDE DU PROFIL
+  /// ================================
   Future<void> saveProfile({
     required Profile profile,
     XFile? avatarXFile,
     File? avatarFile,
-  })
-  async {
-    // === VALIDATION ===
+  }) async {
     if (avatarXFile == null && avatarFile == null) {
       view.showError("Please upload an image first");
       return;
@@ -124,26 +170,27 @@ class ProfilePresenter {
       request.fields['age'] = profile.age.toString();
       request.fields['allergyType'] = profile.allergyType;
 
-      // Add avatar
       if (kIsWeb && avatarXFile != null) {
-        final bytes = await avatarXFile.readAsBytes();
+        final bytes = await _compressWebImage(avatarXFile);
         request.files.add(http.MultipartFile.fromBytes(
           'avatar',
           bytes,
           filename: avatarXFile.name,
         ));
       } else if (avatarFile != null) {
+        final compressed = await _compressFile(avatarFile);
         request.files.add(await http.MultipartFile.fromPath(
           'avatar',
-          avatarFile.path,
+          compressed?.path ?? avatarFile.path,
         ));
       }
 
-      var response = await request.send();
+      final response = await request.send();
       final respStr = await response.stream.bytesToString();
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         view.showSuccess("✅ Profile saved successfully!");
+        await saveUserIdSecurely(profile.userId);
         await loadProfile(userId: profile.userId);
       } else {
         view.showError("❌ Failed to save profile ($respStr)");
@@ -155,16 +202,14 @@ class ProfilePresenter {
     }
   }
 
-  /// ======================================
-  /// Update EXISTING profile
-  /// ======================================
+  /// ================================
+  /// ✏️ MISE À JOUR DU PROFIL
+  /// ================================
   Future<void> updateProfile({
     required Profile profile,
     XFile? avatarXFile,
     File? avatarFile,
-  }) async
-  {
-    // === VALIDATION before update ===
+  }) async {
     if (profile.age < 13) {
       view.showError("You must be at least 13 years old");
       return;
@@ -184,18 +229,18 @@ class ProfilePresenter {
       request.fields['age'] = profile.age.toString();
       request.fields['allergyType'] = profile.allergyType;
 
-      // Add avatar if updated
       if (kIsWeb && avatarXFile != null) {
-        final bytes = await avatarXFile.readAsBytes();
+        final bytes = await _compressWebImage(avatarXFile);
         request.files.add(http.MultipartFile.fromBytes(
           'avatar',
           bytes,
           filename: avatarXFile.name,
         ));
       } else if (avatarFile != null) {
+        final compressed = await _compressFile(avatarFile);
         request.files.add(await http.MultipartFile.fromPath(
           'avatar',
-          avatarFile.path,
+          compressed?.path ?? avatarFile.path,
         ));
       }
 
@@ -204,27 +249,26 @@ class ProfilePresenter {
 
       if (response.statusCode == 200) {
         view.showSuccess("✅ Profile updated successfully!");
+        await saveUserIdSecurely(profile.userId);
         await loadProfile(userId: profile.userId);
       } else {
         view.showError("❌ Failed to update profile ($respStr)");
       }
     } catch (e) {
-      print("Update error: $e");
-      view.showError("Error updating profile");
+      view.showError("Error updating profile: $e");
     } finally {
       view.showLoading(false);
     }
   }
 
-  /// ======================================
-  /// Delete profile
-  /// ======================================
-  Future<void> deleteProfile(String userId) async
-  {
+  /// ================================
+  /// ❌ SUPPRESSION DU PROFIL
+  /// ================================
+  Future<void> deleteProfile(String userId) async {
     try {
       final response = await http.delete(Uri.parse("$baseUrl/$userId"));
-
       if (response.statusCode == 200) {
+        await clearUserData();
         view.showSuccess("✅ Profile deleted successfully!");
       } else if (response.statusCode == 404) {
         view.showError("Profile not found");
