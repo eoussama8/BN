@@ -13,6 +13,10 @@ class AppAssets {
   static const String iconProfile = 'assets/icons/profile.svg';
 }
 
+
+
+
+
 class AppColors {
   // Main colors
   static const Color white = Color(0xFFFFFFFF);

@@ -1,36 +1,32 @@
 import 'package:flutter/material.dart';
-import 'constants.dart';
 
 class AppTextStyles {
-  static const TextStyle button = TextStyle(
-    fontFamily: 'Itim',
-    fontSize: 16,
-    color: AppColors.greyDark,
-  );
-
-  static const TextStyle input = TextStyle(
+  static const title1 = TextStyle(
     fontFamily: 'Poppins',
-    fontSize: 16,
-    color: AppColors.black,
-  );
-
-  static const TextStyle title = TextStyle(
-    fontFamily: 'Poppins',
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w400, // Regular
     fontSize: 30,
-    color: AppColors.greyTitle,
+    color: Colors.black,
   );
 
-  static const TextStyle subtitle = TextStyle(
+  static const title2 = TextStyle(
     fontFamily: 'Poppins',
-    fontWeight: FontWeight.w600,
-    fontSize: 16,
-    color: AppColors.greyMedium,
+    fontWeight: FontWeight.w600, // SemiBold
+    fontSize: 20,
+    color: Colors.black,
   );
 
-  static const TextStyle paragraph = TextStyle(
-    fontFamily: 'Lemon',
-    fontSize: 32,
-    color: AppColors.white,
+  static const body = TextStyle(
+    fontFamily: 'Poppins',
+    fontWeight: FontWeight.w300, // Light
+    fontSize: 15,
+    color: Colors.black87,
+    height: 1.6,
+  );
+
+  static const topBar = TextStyle(
+    fontFamily: 'Poppins',
+    fontWeight: FontWeight.w400, // Regular
+    fontSize: 14,
+    color: Colors.black,
   );
 }
