@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'views/home_view.dart';
 import 'views/contact_view.dart';
 import 'views/profile_view.dart';
 import 'widgets/bottom_nav_bar.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env'); // Always use the asset path
   runApp(const MyApp());
 }
 
@@ -16,10 +19,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // Keep track of selected page by name
   String _selectedNav = "Home";
 
-  // Map labels to pages
   final Map<String, Widget> _pages = {
     "Home": const HomeView(),
     "Contact": const ContactView(),
@@ -40,11 +41,7 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         extendBody: true,
         backgroundColor: Colors.transparent,
-
-        // Show the active page
         body: _pages[_selectedNav] ?? const SizedBox(),
-
-        // Custom BottomNavBar
         bottomNavigationBar: BottomNavBar(
           selectedNav: _selectedNav,
           onNavChange: _onNavChange,

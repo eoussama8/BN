@@ -1,8 +1,7 @@
 import 'dart:io';
-import 'package:beaute_naturelle_ia/views/profile_summary_view.dart';
+import 'package:beaute_naturelle_ia/views/profile_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/profile_model.dart';
 import '../presenters/profile_presenter.dart';
@@ -81,7 +80,6 @@ class _ProfileEditViewState extends State<ProfileEditView>
       });
     }
   }
-
   void _onSaveChanges() async {
     final updatedProfile = Profile(
       userId: _userName ?? "default_user",
@@ -96,8 +94,13 @@ class _ProfileEditViewState extends State<ProfileEditView>
       avatarFile: _avatarImageFile,
     );
 
-    // Go back to summary
+    // Return the updated profile back to the previous screen (ProfileView)
+    if (mounted) {
+      Navigator.pop(context, updatedProfile);
+    }
   }
+
+
 
   void _showSnackBar(String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(

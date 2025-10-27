@@ -2,11 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/profile_model.dart';
 
 /// ================================
@@ -25,22 +26,21 @@ abstract class ProfileViewContract {
 /// ================================
 class ProfilePresenter {
   final ProfileViewContract view;
-  final String baseUrl;
   final ImagePicker _picker = ImagePicker();
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
-  ProfilePresenter(this.view) : baseUrl = _getBaseUrl();
+  final String baseUrl = dotenv.env['BASE_URL'] ?? "http://localhost:3000/api/profiles";
+  final String apiKey = dotenv.env['API_KEY'] ?? "";
 
-  /// Base URL dépend de la plateforme
-  static String _getBaseUrl() {
-    if (!kIsWeb && Platform.isAndroid) {
-      return "http://10.0.2.2:3000/api/profiles"; // Android Emulator
-    }
-    return "http://localhost:3000/api/profiles"; // Web/Desktop
-  }
+
+  ProfilePresenter(this.view);
+
+  Map<String, String> get _headers => {
+    'x-api-key': apiKey,
+  };
 
   /// ================================
-  /// 🔒 STOCKAGE CHIFFRÉ DU USER ID
+  /// 🔒 Secure storage for userId
   /// ================================
   Future<void> saveUserIdSecurely(String userId) async {
     await _secureStorage.write(key: 'userId', value: userId);
@@ -55,44 +55,47 @@ class ProfilePresenter {
   }
 
   /// ================================
-  /// 🔄 CHARGER LE PROFIL
+  /// 🔄 Load profile
   /// ================================
   Future<void> loadProfile({String? userId}) async {
     try {
-      // Charger userId depuis le stockage sécurisé si non fourni
       userId ??= await getUserIdSecurely() ?? "default_user";
 
       final uri = Uri.parse("$baseUrl?userId=$userId");
-      final response = await http.get(uri);
+      final response = await http.get(uri, headers: _headers);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final profile = Profile.fromJson(data);
         final avatarUrl = data['avatar'] != null
-            ? "http://localhost:3000/${data['avatar']}"
+            ? "${baseUrl.split('/api')[0]}/${data['avatar']}"
             : null;
 
         view.updateProfileExistsState(true);
         view.showProfile(profile, avatarUrl);
-
-        // Sauvegarde automatique du userId
         await saveUserIdSecurely(userId);
       } else if (response.statusCode == 404) {
         view.updateProfileExistsState(false);
       } else {
         view.showError("Error loading profile: ${response.statusCode}");
+        print("Error loading profile: ${response.statusCode}");
+
+
       }
     } catch (e) {
       view.showError("Error loading profile: $e");
+      print("Error loading profile: $e");
+
+
     }
   }
 
   /// ================================
-  /// 🖼️ PICK IMAGE (avec compression de base)
+  /// 🖼️ Pick image
   /// ================================
   Future<XFile?> pickImageFromGallery() async {
     try {
-      final XFile? pickedFile = await _picker.pickImage(
+      final pickedFile = await _picker.pickImage(
         source: ImageSource.gallery,
         maxWidth: 1024,
         maxHeight: 1024,
@@ -106,13 +109,13 @@ class ProfilePresenter {
   }
 
   /// ================================
-  /// 🗜️ COMPRESSION DES IMAGES
+  /// 🗜️ Compress images
   /// ================================
   Future<File?> _compressFile(File file) async {
     final targetPath =
         "${file.parent.path}/compressed_${file.uri.pathSegments.last}";
 
-    final compressedXFile = await FlutterImageCompress.compressAndGetFile(
+    final compressedFile = await FlutterImageCompress.compressAndGetFile(
       file.path,
       targetPath,
       quality: 70,
@@ -120,42 +123,38 @@ class ProfilePresenter {
       minHeight: 800,
     );
 
-    // Convertir XFile → File
-    return compressedXFile != null ? File(compressedXFile.path) : null;
+    if (compressedFile == null) return null;
+    return File(compressedFile.path);
   }
+
 
   Future<Uint8List> _compressWebImage(XFile file) async {
     final bytes = await file.readAsBytes();
     final decoded = img.decodeImage(bytes);
     if (decoded == null) return bytes;
-    final compressed = img.encodeJpg(decoded, quality: 70);
-    return Uint8List.fromList(compressed);
+    return Uint8List.fromList(img.encodeJpg(decoded, quality: 70));
   }
 
   /// ================================
-  /// 💾 SAUVEGARDE DU PROFIL
+  /// 💾 Save profile
   /// ================================
   Future<void> saveProfile({
     required Profile profile,
     XFile? avatarXFile,
     File? avatarFile,
   }) async {
-    if (avatarXFile == null && avatarFile == null) {
+    if ((avatarXFile == null && avatarFile == null)) {
       view.showError("Please upload an image first");
       return;
     }
-
-    if (profile.skinType == "Choose your skin type" ||
-        profile.skinType.trim().isEmpty) {
+    if (profile.skinType.trim().isEmpty || profile.skinType == "Choose your skin type") {
       view.showError("Please select your skin type");
       return;
     }
-
     if (profile.age < 13) {
       view.showError("You must be at least 13 years old");
       return;
     }
-
     const validAllergies = ["None", "Pollen", "Dust", "Food"];
     if (!validAllergies.contains(profile.allergyType)) {
       view.showError("Please select a valid allergy type");
@@ -164,11 +163,12 @@ class ProfilePresenter {
 
     view.showLoading(true);
     try {
-      var request = http.MultipartRequest('POST', Uri.parse(baseUrl));
-      request.fields['userId'] = profile.userId;
-      request.fields['skinType'] = profile.skinType;
-      request.fields['age'] = profile.age.toString();
-      request.fields['allergyType'] = profile.allergyType;
+      var request = http.MultipartRequest('POST', Uri.parse(baseUrl))
+        ..headers.addAll(_headers)
+        ..fields['userId'] = profile.userId
+        ..fields['skinType'] = profile.skinType
+        ..fields['age'] = profile.age.toString()
+        ..fields['allergyType'] = profile.allergyType;
 
       if (kIsWeb && avatarXFile != null) {
         final bytes = await _compressWebImage(avatarXFile);
@@ -203,7 +203,7 @@ class ProfilePresenter {
   }
 
   /// ================================
-  /// ✏️ MISE À JOUR DU PROFIL
+  /// ✏️ Update profile
   /// ================================
   Future<void> updateProfile({
     required Profile profile,
@@ -214,7 +214,6 @@ class ProfilePresenter {
       view.showError("You must be at least 13 years old");
       return;
     }
-
     const validAllergies = ["None", "Pollen", "Dust", "Food"];
     if (!validAllergies.contains(profile.allergyType)) {
       view.showError("Please select a valid allergy type");
@@ -223,11 +222,12 @@ class ProfilePresenter {
 
     view.showLoading(true);
     try {
-      var request = http.MultipartRequest('PUT', Uri.parse(baseUrl));
-      request.fields['userId'] = profile.userId;
-      request.fields['skinType'] = profile.skinType;
-      request.fields['age'] = profile.age.toString();
-      request.fields['allergyType'] = profile.allergyType;
+      var request = http.MultipartRequest('PUT', Uri.parse(baseUrl))
+        ..headers.addAll(_headers)
+        ..fields['userId'] = profile.userId
+        ..fields['skinType'] = profile.skinType
+        ..fields['age'] = profile.age.toString()
+        ..fields['allergyType'] = profile.allergyType;
 
       if (kIsWeb && avatarXFile != null) {
         final bytes = await _compressWebImage(avatarXFile);
@@ -262,11 +262,15 @@ class ProfilePresenter {
   }
 
   /// ================================
-  /// ❌ SUPPRESSION DU PROFIL
+  /// ❌ Delete profile
   /// ================================
   Future<void> deleteProfile(String userId) async {
     try {
-      final response = await http.delete(Uri.parse("$baseUrl/$userId"));
+      final response = await http.delete(
+        Uri.parse("$baseUrl?userId=$userId"),
+        headers: _headers,
+      );
+
       if (response.statusCode == 200) {
         await clearUserData();
         view.showSuccess("✅ Profile deleted successfully!");
