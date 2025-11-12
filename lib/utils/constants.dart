@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class AppAssets {
   // Images
   static const String logoPng = 'assets/images/logo.png';
+  static const String logo = 'assets/images/logo.jpg';
 
 
   static const String background = 'assets/icons/background.svg';
@@ -29,6 +30,14 @@ class AppColors {
   static const Color greenDark = Color(0xFF67815A);
   static const Color green1 = Color(0xFF97A087);
   static const Color green2 = Color(0xFF8CA87D);
+
+  static const Color MainColor = Color(0xFFCF3085);
+  static const Color MainColor2 = Color(0xFFF4639B);
+  static const Color Hover = Color(0xFFFCD2E2);
+
+
+
+
 
   // Additional colors
   static const Color red = Color(0xFFFB4447);

@@ -55,16 +55,11 @@ class ProfileSummaryView extends StatelessWidget {
           ),
         ],
       ),
-
-      // 🌿 Background decorations behind content
       body: Stack(
         children: [
-          // Top-right background
-
-          // Bottom-left background
           Positioned(
-            bottom: 80, // padding from bottom
-            left: 20, // padding from left
+            bottom: 80,
+            left: 20,
             child: Opacity(
               opacity: 0.4,
               child: SvgPicture.asset(
@@ -76,8 +71,6 @@ class ProfileSummaryView extends StatelessWidget {
               ),
             ),
           ),
-
-          // 🧩 Main content
           SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -143,7 +136,7 @@ class ProfileSummaryView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  profile.userId.toUpperCase(),
+                  '${profile.firstName} ${profile.lastName}',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -210,15 +203,17 @@ class ProfileSummaryView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildInfoRow("First Name", profile.userId),
+          _buildInfoRow("First Name", profile.firstName),
           const SizedBox(height: 20),
-          _buildInfoRow("Last Name", profile.userId.toUpperCase()),
+          _buildInfoRow("Last Name", profile.lastName),
           const SizedBox(height: 20),
-          _buildInfoRow("AGE", "${profile.age} years old"),
+          _buildInfoRow("Age", "${profile.age} years old"),
           const SizedBox(height: 20),
-          _buildInfoRow("SKIN TYPE", profile.skinType),
+          _buildInfoRow("Skin Type", profile.skinType),
           const SizedBox(height: 20),
-          _buildInfoRow("ALLERGY TYPE", profile.allergyType),
+          _buildInfoRow("Allergies", profile.allergyTypes.isNotEmpty
+              ? profile.allergyTypes.join(", ")
+              : "None"),
         ],
       ),
     );

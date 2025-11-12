@@ -1,33 +1,49 @@
 class Profile {
   String userId;
+  String firstName;
+  String lastName;
   String skinType;
-  String allergyType;
+  List<String> allergyTypes; // ✅ multiple allergies
   int age;
 
   Profile({
     required this.userId,
+    this.firstName = '',
+    this.lastName = '',
     required this.skinType,
-    required this.allergyType,
+    required this.allergyTypes,
     required this.age,
   });
 
-  // From JSON (for loading)
+  /// From JSON (loading from backend)
   factory Profile.fromJson(Map<String, dynamic> json) {
     return Profile(
       userId: json['userId'] ?? 'default_user',
+      firstName: json['firstName'] ?? '',
+      lastName: json['lastName'] ?? '',
       skinType: json['skinType'] ?? 'Choose your skin type',
-      allergyType: json['allergyType'] ?? 'Choose your allergy type',
+      allergyTypes: json['allergyType'] != null
+          ? List<String>.from(json['allergyType'])
+          : [],
       age: json['age'] ?? 18,
     );
   }
 
-  // Convert to Map<String, String> for sending in HTTP
+  /// Convert to Map<String, dynamic> for sending in HTTP
   Map<String, String> toFields() {
-    return {
+    final fields = <String, String>{
+      'userId': userId,
       'skinType': skinType,
-      'allergyType': allergyType,
       'age': age.toString(),
-      'userId': userId, // include userId
+      'firstName': firstName,
+      'lastName': lastName,
     };
+
+    // For multiple allergies, add as allergyType[]
+    for (int i = 0; i < allergyTypes.length; i++) {
+      fields['allergyType[$i]'] = allergyTypes[i];
+    }
+
+    return fields;
   }
 }

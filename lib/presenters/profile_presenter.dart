@@ -32,16 +32,13 @@ class ProfilePresenter {
   final String baseUrl = dotenv.env['BASE_URL'] ?? "http://localhost:3000/api/profiles";
   final String apiKey = dotenv.env['API_KEY'] ?? "";
 
-
   ProfilePresenter(this.view);
 
   Map<String, String> get _headers => {
     'x-api-key': apiKey,
   };
 
-  /// ================================
   /// 🔒 Secure storage for userId
-  /// ================================
   Future<void> saveUserIdSecurely(String userId) async {
     await _secureStorage.write(key: 'userId', value: userId);
   }
@@ -54,9 +51,7 @@ class ProfilePresenter {
     await _secureStorage.deleteAll();
   }
 
-  /// ================================
   /// 🔄 Load profile
-  /// ================================
   Future<void> loadProfile({String? userId}) async {
     try {
       userId ??= await getUserIdSecurely() ?? "default_user";
@@ -78,21 +73,13 @@ class ProfilePresenter {
         view.updateProfileExistsState(false);
       } else {
         view.showError("Error loading profile: ${response.statusCode}");
-        print("Error loading profile: ${response.statusCode}");
-
-
       }
     } catch (e) {
       view.showError("Error loading profile: $e");
-      print("Error loading profile: $e");
-
-
     }
   }
 
-  /// ================================
   /// 🖼️ Pick image
-  /// ================================
   Future<XFile?> pickImageFromGallery() async {
     try {
       final pickedFile = await _picker.pickImage(
@@ -108,9 +95,7 @@ class ProfilePresenter {
     }
   }
 
-  /// ================================
-  /// 🗜️ Compress images
-  /// ================================
+  /// 🗜️ Compress image (mobile)
   Future<File?> _compressFile(File file) async {
     final targetPath =
         "${file.parent.path}/compressed_${file.uri.pathSegments.last}";
@@ -127,7 +112,7 @@ class ProfilePresenter {
     return File(compressedFile.path);
   }
 
-
+  /// 🗜️ Compress image (web)
   Future<Uint8List> _compressWebImage(XFile file) async {
     final bytes = await file.readAsBytes();
     final decoded = img.decodeImage(bytes);
@@ -135,30 +120,38 @@ class ProfilePresenter {
     return Uint8List.fromList(img.encodeJpg(decoded, quality: 70));
   }
 
-  /// ================================
   /// 💾 Save profile
-  /// ================================
-  Future<void> saveProfile({
+  Future<bool> saveProfile({
     required Profile profile,
     XFile? avatarXFile,
     File? avatarFile,
   }) async {
     if ((avatarXFile == null && avatarFile == null)) {
       view.showError("Please upload an image first");
-      return;
+      return false;
     }
+
     if (profile.skinType.trim().isEmpty || profile.skinType == "Choose your skin type") {
       view.showError("Please select your skin type");
-      return;
+      return false;
     }
+
     if (profile.age < 13) {
       view.showError("You must be at least 13 years old");
-      return;
+      return false;
     }
-    const validAllergies = ["None", "Pollen", "Dust", "Food"];
-    if (!validAllergies.contains(profile.allergyType)) {
-      view.showError("Please select a valid allergy type");
-      return;
+
+    if (profile.allergyTypes.isEmpty) {
+      view.showError("Please select at least one allergy");
+      return false;
+    }
+
+    const validAllergies = ["Gluten", "Pollen", "Dust", "Nut", "Milk", "Pet Dander"];
+    for (var allergy in profile.allergyTypes) {
+      if (!validAllergies.contains(allergy)) {
+        view.showError("Invalid allergy selected: $allergy");
+        return false;
+      }
     }
 
     view.showLoading(true);
@@ -166,9 +159,14 @@ class ProfilePresenter {
       var request = http.MultipartRequest('POST', Uri.parse(baseUrl))
         ..headers.addAll(_headers)
         ..fields['userId'] = profile.userId
+        ..fields['firstName'] = profile.firstName
+        ..fields['lastName'] = profile.lastName
         ..fields['skinType'] = profile.skinType
-        ..fields['age'] = profile.age.toString()
-        ..fields['allergyType'] = profile.allergyType;
+        ..fields['age'] = profile.age.toString();
+
+      for (var i = 0; i < profile.allergyTypes.length; i++) {
+        request.fields['allergyType[$i]'] = profile.allergyTypes[i];
+      }
 
       if (kIsWeb && avatarXFile != null) {
         final bytes = await _compressWebImage(avatarXFile);
@@ -192,42 +190,57 @@ class ProfilePresenter {
         view.showSuccess("✅ Profile saved successfully!");
         await saveUserIdSecurely(profile.userId);
         await loadProfile(userId: profile.userId);
+        return true;
       } else {
         view.showError("❌ Failed to save profile ($respStr)");
+        return false;
       }
     } catch (e) {
       view.showError("Something went wrong: $e");
+      return false;
     } finally {
       view.showLoading(false);
     }
   }
 
-  /// ================================
   /// ✏️ Update profile
-  /// ================================
-  Future<void> updateProfile({
+  Future<bool> updateProfile({
     required Profile profile,
     XFile? avatarXFile,
     File? avatarFile,
   }) async {
     if (profile.age < 13) {
       view.showError("You must be at least 13 years old");
-      return;
+      return false;
     }
-    const validAllergies = ["None", "Pollen", "Dust", "Food"];
-    if (!validAllergies.contains(profile.allergyType)) {
-      view.showError("Please select a valid allergy type");
-      return;
+
+    if (profile.allergyTypes.isEmpty) {
+      view.showError("Please select at least one allergy");
+      return false;
+    }
+
+    const validAllergies = ["Gluten", "Pollen", "Dust", "Nut", "Milk", "Pet Dander"];
+    for (var allergy in profile.allergyTypes) {
+      if (!validAllergies.contains(allergy)) {
+        view.showError("Invalid allergy selected: $allergy");
+        return false;
+      }
     }
 
     view.showLoading(true);
+
     try {
       var request = http.MultipartRequest('PUT', Uri.parse(baseUrl))
         ..headers.addAll(_headers)
         ..fields['userId'] = profile.userId
+        ..fields['firstName'] = profile.firstName
+        ..fields['lastName'] = profile.lastName
         ..fields['skinType'] = profile.skinType
-        ..fields['age'] = profile.age.toString()
-        ..fields['allergyType'] = profile.allergyType;
+        ..fields['age'] = profile.age.toString();
+
+      for (var i = 0; i < profile.allergyTypes.length; i++) {
+        request.fields['allergyType[$i]'] = profile.allergyTypes[i];
+      }
 
       if (kIsWeb && avatarXFile != null) {
         final bytes = await _compressWebImage(avatarXFile);
@@ -251,19 +264,21 @@ class ProfilePresenter {
         view.showSuccess("✅ Profile updated successfully!");
         await saveUserIdSecurely(profile.userId);
         await loadProfile(userId: profile.userId);
+        return true;
       } else {
         view.showError("❌ Failed to update profile ($respStr)");
+        return false;
       }
     } catch (e) {
       view.showError("Error updating profile: $e");
+      return false;
     } finally {
       view.showLoading(false);
     }
   }
 
-  /// ================================
+
   /// ❌ Delete profile
-  /// ================================
   Future<void> deleteProfile(String userId) async {
     try {
       final response = await http.delete(
