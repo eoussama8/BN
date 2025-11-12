@@ -73,34 +73,38 @@ flutter:
   uses-material-design: true
 
 
-assets:
-  - assets/icons/normal.svg
-  - assets/icons/dry.svg
-  - assets/icons/oily.svg
-  - assets/icons/sensitive.svg
-  - assets/icons/combination.svg
-  - assets/icons/background.svg
-  - assets/icons/background2.svg
-  - assets/icons/camera.svg
-  - assets/icons/menu.svg
-  - assets/icons/badge.svg
-  - assets/icons/badge2.svg
-  - assets/icons/chronometre2.svg
-  - assets/icons/dimond.svg
-  - assets/icons/Group.svg
-  - assets/icons/police.svg
-  - assets/icons/recompenses2.svg
-  - assets/icons/settings.svg
-  - assets/images/logo.png
-  - assets/images/logo.jpg
-  - assets/images/placeholder.png
-  - assets/images/icone-home.png
-  - assets/images/icone-profil.png
-  - assets/images/icone-recette.svg
-  - assets/images/icone-passport.png
-  - assets/images/splash.png
-  - assets/images/splash1.png
-  - .env
+  assets:
+    - assets/icons/normal.svg
+    - assets/icons/dry.svg
+    - assets/icons/oily.svg
+    - assets/icons/sensitive.svg
+    - assets/icons/combination.svg
+    - assets/icons/background.svg
+    - assets/icons/background2.svg
+    - assets/icons/camera.svg
+    - assets/icons/menu.svg
+    - assets/icons/badge.svg
+    - assets/icons/badge2.svg
+    - assets/icons/chronometre2.svg
+    - assets/icons/dimond.svg
+    - assets/icons/Group.svg
+    - assets/icons/police.svg
+    - assets/icons/recompenses2.svg
+    - assets/icons/settings.svg
+    - assets/icons/edit.svg
+    - assets/icons/task.svg
+    - assets/icons/birday.svg
+    - assets/icons/chart.svg
+    - assets/images/logo.png
+    - assets/images/logo.jpg
+    - assets/images/placeholder.png
+    - assets/images/icone-home.png
+    - assets/images/icone-profil.png
+    - assets/images/icone-recette.svg
+    - assets/images/icone-passport.png
+    - assets/images/splash.png
+    - assets/images/splash1.png
+    - .env
 
 
 
