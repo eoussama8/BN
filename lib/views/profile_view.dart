@@ -28,7 +28,7 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
   bool _isSearchFocused = false;
   List<String> selectedAllergies = [];
   final List<String> allergyOptions = ["Gluten", "Pollen", "Dust", "Nut", "Milk", "Pet Dander"];
-  int _age = 18;
+  int? _age;
   bool _isSaving = false;
   Profile? _profileData;
   bool _isAvatarHovered = false;
@@ -206,7 +206,7 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
               child: const Icon(
                 Icons.menu,
                 color: AppColors.white,
-                size: 24,
+                size: 38,
               ),
             ),
           ),
@@ -324,7 +324,7 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
         child: Column(
           children: [
 
-            const SizedBox(height: 25),
+            const SizedBox(height: 45),
             _buildPersonalDetailsCard(),
             const SizedBox(height: 25),
             _buildSkinTypeCard(),
@@ -356,6 +356,8 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
   }
 
   Widget _buildAgeField() {
+    final controller = TextEditingController(text: _age?.toString() ?? "");
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -369,74 +371,44 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
         ),
         const SizedBox(height: 8),
         Container(
-          // slightly increased height
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
           decoration: BoxDecoration(
             color: AppColors.greyLight.withOpacity(0.05),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.greyLight.withOpacity(0.2)),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                height: 34,
-                width: 34,
-                child: IconButton(
-                  padding: EdgeInsets.zero,
-                  icon: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: AppColors.MainColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.remove,
-                      color: AppColors.MainColor,
-                      size: 18,
-                    ),
-                  ),
-                  onPressed: () {
-                    if (_age > 1) setState(() => _age--);
-                  },
-                ),
+          child: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              hintText: "Entrez votre âge",
+              hintStyle: TextStyle(
+                color: AppColors.greyLight.withOpacity(0.6),
+                fontSize: 14,
               ),
-              Text(
-                '$_age ans',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.black,
-                ),
-              ),
-              SizedBox(
-                height: 34,
-                width: 34,
-                child: IconButton(
-                  padding: EdgeInsets.zero,
-                  icon: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: AppColors.MainColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.add,
-                      color: AppColors.MainColor,
-                      size: 18,
-                    ),
-                  ),
-                  onPressed: () {
-                    if (_age < 120) setState(() => _age++);
-                  },
-                ),
-              ),
-            ],
+              border: InputBorder.none,
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(vertical: 2),
+            ),
+            style: const TextStyle(
+              fontSize: 16,
+              color: AppColors.black,
+              fontWeight: FontWeight.w500,
+            ),
+            onChanged: (v) {
+              final parsed = int.tryParse(v);
+              if (parsed != null && parsed >= 0 && parsed <= 120) {
+                _age = parsed;
+              } else {
+                _age = null;
+              }
+            },
           ),
         ),
       ],
     );
   }
+
 
   Widget _textField(String label, String value) {
     final controller = TextEditingController(text: value);

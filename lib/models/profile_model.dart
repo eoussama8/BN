@@ -4,7 +4,7 @@ class Profile {
   String lastName;
   String skinType;
   List<String> allergyTypes; // ✅ multiple allergies
-  int age;
+  int? age;
 
   Profile({
     required this.userId,
@@ -25,8 +25,7 @@ class Profile {
       allergyTypes: json['allergyType'] != null
           ? List<String>.from(json['allergyType'])
           : [],
-      age: json['age'] ?? 18,
-    );
+      age: json['age'] == null ? null : int.tryParse(json['age'].toString()),    );
   }
 
   /// Convert to Map<String, dynamic> for sending in HTTP

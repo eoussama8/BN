@@ -27,7 +27,7 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
   String? _avatarUrl;
 
   String _skinType = "";
-  int _age = 0;
+  int? _age;
 
   List<String> selectedAllergies = [];
   final List<String> allergyOptions = ["Gluten", "Pollen", "Dust", "Nut", "Milk", "Pet Dander"];
@@ -378,6 +378,8 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
   }
 
   Widget _buildAgeField() {
+    final controller = TextEditingController(text: _age?.toString() ?? "");
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -391,73 +393,44 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
         ),
         const SizedBox(height: 8),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
           decoration: BoxDecoration(
             color: AppColors.greyLight.withOpacity(0.05),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.greyLight.withOpacity(0.2)),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                height: 34,
-                width: 34,
-                child: IconButton(
-                  padding: EdgeInsets.zero,
-                  icon: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: AppColors.MainColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.remove,
-                      color: AppColors.MainColor,
-                      size: 18,
-                    ),
-                  ),
-                  onPressed: () {
-                    if (_age > 1) setState(() => _age--);
-                  },
-                ),
+          child: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              hintText: "Entrez votre âge",
+              hintStyle: TextStyle(
+                color: AppColors.greyLight.withOpacity(0.6),
+                fontSize: 14,
               ),
-              Text(
-                '$_age ans',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.black,
-                ),
-              ),
-              SizedBox(
-                height: 34,
-                width: 34,
-                child: IconButton(
-                  padding: EdgeInsets.zero,
-                  icon: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: AppColors.MainColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.add,
-                      color: AppColors.MainColor,
-                      size: 18,
-                    ),
-                  ),
-                  onPressed: () {
-                    if (_age < 120) setState(() => _age++);
-                  },
-                ),
-              ),
-            ],
+              border: InputBorder.none,
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(vertical: 2),
+            ),
+            style: const TextStyle(
+              fontSize: 16,
+              color: AppColors.black,
+              fontWeight: FontWeight.w500,
+            ),
+            onChanged: (v) {
+              final parsed = int.tryParse(v);
+              if (parsed != null && parsed >= 0 && parsed <= 120) {
+                _age = parsed;
+              } else {
+                _age = null;
+              }
+            },
           ),
         ),
       ],
     );
   }
+
 
   Widget _buildSkinTypeCard() {
     final skinTypes = {

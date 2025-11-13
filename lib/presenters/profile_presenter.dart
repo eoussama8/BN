@@ -150,10 +150,6 @@ class ProfilePresenter {
       return false;
     }
 
-    if (profile.age < 13) {
-      view.showError("You must be at least 13 years old");
-      return false;
-    }
 
     if (profile.allergyTypes.isEmpty) {
       view.showError("Please select at least one allergy");
@@ -242,10 +238,7 @@ class ProfilePresenter {
     XFile? avatarXFile,
     File? avatarFile,
   }) async {
-    if (profile.age < 13) {
-      view.showError("You must be at least 13 years old");
-      return false;
-    }
+
 
     if (profile.allergyTypes.isEmpty) {
       view.showError("Please select at least one allergy");

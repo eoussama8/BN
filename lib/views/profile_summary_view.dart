@@ -22,6 +22,11 @@ class ProfileSummaryView extends StatelessWidget {
     this.testedRecipes = 0,
   }) : super(key: key);
 
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
 
@@ -64,6 +69,8 @@ class ProfileSummaryView extends StatelessWidget {
       ),
     );
   }
+
+
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.only(
@@ -99,25 +106,26 @@ class ProfileSummaryView extends StatelessWidget {
             ),
           ),
           const Text(
-            "Profil",
+            "Profile",
             style: TextStyle(
               fontSize: 20,
               color: AppColors.white,
               fontWeight: FontWeight.bold,
             ),
           ),
-          Container(
-            width: 45,
-            height: 45,
-            decoration: BoxDecoration(
-              color: AppColors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: SvgPicture.asset(
-              'assets/icons/menu.svg',
-              color: AppColors.white,
-              width: 24,
-              height: 24,
+          GestureDetector(
+            child: Container(
+              width: 45,
+              height: 45,
+              decoration: BoxDecoration(
+                color: AppColors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.menu,
+                color: AppColors.white,
+                size: 38,
+              ),
             ),
           ),
         ],
@@ -163,7 +171,7 @@ class ProfileSummaryView extends StatelessWidget {
   Widget _buildMainContent(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(top: 100),
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       decoration: const BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.only(
@@ -174,7 +182,7 @@ class ProfileSummaryView extends StatelessWidget {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            const SizedBox(height: 35),
+            const SizedBox(height: 25),
             _buildEditButton(context),
             const SizedBox(height: 15),
             _buildNameSection(),
@@ -222,6 +230,10 @@ class ProfileSummaryView extends StatelessWidget {
   }
 
   Widget _buildNameSection() {
+    final hasAge = profile.age != null &&
+        profile.age.toString().trim().isNotEmpty &&
+        profile.age.toString().toLowerCase() != 'null';
+
     return Column(
       children: [
         Text(
@@ -236,22 +248,25 @@ class ProfileSummaryView extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SvgPicture.asset(
-              'assets/icons/birday.svg',
-              color: AppColors.MainColor,
-              width: 20,
-              height: 20,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              '${profile.age}ans',
-              style: TextStyle(
-                fontSize: 16,
-                color: AppColors.greyMedium,
-                fontWeight: FontWeight.w500,
+            // 👇 Show age only if it exists
+            if (hasAge) ...[
+              SvgPicture.asset(
+                'assets/icons/birday.svg',
+                color: AppColors.MainColor,
+                width: 20,
+                height: 20,
               ),
-            ),
-            const SizedBox(width: 20),
+              const SizedBox(width: 6),
+              Text(
+                '${profile.age} ans',
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: AppColors.greyMedium,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 20),
+            ],
             SvgPicture.asset(
               'assets/icons/${profile.skinType.toLowerCase()}.svg',
               color: AppColors.MainColor,
@@ -261,7 +276,7 @@ class ProfileSummaryView extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               '${profile.skinType} Skin',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 color: AppColors.greyMedium,
                 fontWeight: FontWeight.w500,
