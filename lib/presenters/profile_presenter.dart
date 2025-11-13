@@ -120,14 +120,28 @@ class ProfilePresenter {
     return Uint8List.fromList(img.encodeJpg(decoded, quality: 70));
   }
 
-  /// 💾 Save profile
+  // ============================================
+  // ================== SAVE ====================
+  // ============================================
+
   Future<bool> saveProfile({
     required Profile profile,
     XFile? avatarXFile,
     File? avatarFile,
   }) async {
-    if ((avatarXFile == null && avatarFile == null)) {
+    // ✅ Basic input validation
+    if (avatarXFile == null && avatarFile == null) {
       view.showError("Please upload an image first");
+      return false;
+    }
+
+    if (profile.firstName.trim().isEmpty) {
+      view.showError("Please enter your first name");
+      return false;
+    }
+
+    if (profile.lastName.trim().isEmpty) {
+      view.showError("Please enter your last name");
       return false;
     }
 
@@ -146,43 +160,39 @@ class ProfilePresenter {
       return false;
     }
 
+    // ✅ Validate allergies
     const validAllergies = ["Gluten", "Pollen", "Dust", "Nut", "Milk", "Pet Dander"];
-    for (var allergy in profile.allergyTypes) {
-      if (!validAllergies.contains(allergy)) {
-        view.showError("Invalid allergy selected: $allergy");
-        return false;
-      }
+    final invalidAllergies = profile.allergyTypes.where((a) => !validAllergies.contains(a)).toList();
+
+    if (invalidAllergies.isNotEmpty) {
+      view.showError("Invalid allergy selected: ${invalidAllergies.join(', ')}");
+      return false;
     }
 
     view.showLoading(true);
     try {
-      var request = http.MultipartRequest('POST', Uri.parse(baseUrl))
+      // ✅ Create multipart request
+      final uri = Uri.parse(baseUrl);
+      final request = http.MultipartRequest('POST', uri)
         ..headers.addAll(_headers)
         ..fields['userId'] = profile.userId
-        ..fields['firstName'] = profile.firstName
-        ..fields['lastName'] = profile.lastName
+        ..fields['firstName'] = profile.firstName.trim()
+        ..fields['lastName'] = profile.lastName.trim()
         ..fields['skinType'] = profile.skinType
         ..fields['age'] = profile.age.toString();
 
+      // ✅ Send allergies in same format as updateProfile
       for (var i = 0; i < profile.allergyTypes.length; i++) {
         request.fields['allergyType[$i]'] = profile.allergyTypes[i];
       }
 
-      if (kIsWeb && avatarXFile != null) {
-        final bytes = await _compressWebImage(avatarXFile);
-        request.files.add(http.MultipartFile.fromBytes(
-          'avatar',
-          bytes,
-          filename: avatarXFile.name,
-        ));
-      } else if (avatarFile != null) {
-        final compressed = await _compressFile(avatarFile);
-        request.files.add(await http.MultipartFile.fromPath(
-          'avatar',
-          compressed?.path ?? avatarFile.path,
-        ));
-      }
+      // ✅ Add avatar file
+      request.files.add(await _prepareAvatar(
+        avatarXFile: avatarXFile,
+        avatarFile: avatarFile,
+      ));
 
+      // ✅ Send request
       final response = await request.send();
       final respStr = await response.stream.bytesToString();
 
@@ -192,7 +202,7 @@ class ProfilePresenter {
         await loadProfile(userId: profile.userId);
         return true;
       } else {
-        view.showError("❌ Failed to save profile ($respStr)");
+        view.showError("❌ Failed to save profile (${response.statusCode}): $respStr");
         return false;
       }
     } catch (e) {
@@ -200,6 +210,29 @@ class ProfilePresenter {
       return false;
     } finally {
       view.showLoading(false);
+    }
+  }
+
+  /// Helper to prepare avatar for upload
+  Future<http.MultipartFile> _prepareAvatar({
+    XFile? avatarXFile,
+    File? avatarFile,
+  }) async {
+    if (kIsWeb && avatarXFile != null) {
+      final bytes = await _compressWebImage(avatarXFile);
+      return http.MultipartFile.fromBytes(
+        'avatar',
+        bytes,
+        filename: avatarXFile.name,
+      );
+    } else if (avatarFile != null) {
+      final compressed = await _compressFile(avatarFile);
+      return await http.MultipartFile.fromPath(
+        'avatar',
+        compressed?.path ?? avatarFile.path,
+      );
+    } else {
+      throw Exception("No avatar file provided");
     }
   }
 

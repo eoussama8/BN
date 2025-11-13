@@ -88,20 +88,13 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
       age: _age,
     );
 
-    final success = await _presenter.saveProfile(
+    await _presenter.saveProfile(
       profile: profile,
       avatarXFile: _avatarImageXFile,
       avatarFile: _avatarImageFile,
     );
 
-    if (success && mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ProfileSummaryView(profile: profile, avatarUrl: _avatarUrl),
-        ),
-      );
-    }
+
   }
 
   void _showSnackBar(String message, Color color) {
@@ -122,16 +115,36 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
     return Scaffold(
       backgroundColor: AppColors.MainColor,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            _buildHeader(),
-            Expanded(
-              child: Stack(
-                children: [
-                  _buildMainContent(),
-                  _buildAvatar(),
-                ],
+            // Gradient background from top to avatar
+            Container(
+              height: 200,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.MainColor,
+                    AppColors.MainColor2,
+
+                  ],
+                ),
               ),
+            ),
+            // Original content
+            Column(
+              children: [
+                _buildHeader(),
+                Expanded(
+                  child: Stack(
+                    children: [
+                      _buildMainContent(),
+                      _buildAvatar(),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -144,7 +157,7 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
       padding: const EdgeInsets.only(
         left: 16,
         right: 16,
-        top: 20, // 👈 added more space at the top
+        top: 20,
         bottom: 12,
       ),
       child: Row(
@@ -201,6 +214,7 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
       ),
     );
   }
+
 
   Widget _buildAvatar() {
     // Check if platform is mobile

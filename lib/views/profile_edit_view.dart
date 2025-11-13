@@ -114,26 +114,47 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
   // ---------- Build ----------
   @override
   Widget build(BuildContext context) {
+
+
     return Scaffold(
       backgroundColor: AppColors.MainColor,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            _buildHeader(),
-            Expanded(
-              child: Stack(
-                children: [
-                  _buildMainContent(),
-                  _buildAvatar(),
-                ],
+            // Gradient background from top to avatar
+            Container(
+              height: 200,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.MainColor,
+                    AppColors.MainColor2,
+
+                  ],
+                ),
               ),
+            ),
+            // Original content
+            Column(
+              children: [
+                _buildHeader(),
+                Expanded(
+                  child: Stack(
+                    children: [
+                      _buildMainContent(),
+                      _buildAvatar(),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),
       ),
     );
   }
-
   // ---------- Header ----------
   Widget _buildHeader() {
     return Container(

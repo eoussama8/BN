@@ -24,26 +24,46 @@ class ProfileSummaryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: AppColors.MainColor,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            _buildHeader(context),
-            Expanded(
-              child: Stack(
-                children: [
-                  _buildMainContent(context),
-                  _buildAvatar(context),
-                ],
+            // Gradient background from top to avatar
+            Container(
+              height: 200,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.MainColor,
+                    AppColors.MainColor2,
+
+                  ],
+                ),
               ),
+            ),
+            // Original content
+            Column(
+              children: [
+                _buildHeader(context),
+                Expanded(
+                  child: Stack(
+                    children: [
+                      _buildMainContent(context),
+                      _buildAvatar(context),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),
       ),
     );
   }
-
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.only(
