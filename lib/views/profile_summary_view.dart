@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../models/BadgeItem.dart';
 import '../models/profile_model.dart';
 import '../utils/constants.dart';
 import 'profile_edit_view.dart';
@@ -22,14 +23,8 @@ class ProfileSummaryView extends StatelessWidget {
     this.testedRecipes = 0,
   }) : super(key: key);
 
-
-
-
-
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: AppColors.MainColor,
       body: SafeArea(
@@ -45,7 +40,6 @@ class ProfileSummaryView extends StatelessWidget {
                   colors: [
                     AppColors.MainColor,
                     AppColors.MainColor2,
-
                   ],
                 ),
               ),
@@ -69,7 +63,6 @@ class ProfileSummaryView extends StatelessWidget {
       ),
     );
   }
-
 
   Widget _buildHeader(BuildContext context) {
     return Container(
@@ -182,7 +175,6 @@ class ProfileSummaryView extends StatelessWidget {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            const SizedBox(height: 25),
             _buildEditButton(context),
             const SizedBox(height: 15),
             _buildNameSection(),
@@ -217,8 +209,8 @@ class ProfileSummaryView extends StatelessWidget {
           );
         },
         child: Container(
-          width: 60,
-          height: 60,
+          width: 50,
+          height: 50,
           padding: const EdgeInsets.all(10),
           child: SvgPicture.asset(
             'assets/icons/edit.svg',
@@ -268,7 +260,9 @@ class ProfileSummaryView extends StatelessWidget {
               const SizedBox(width: 20),
             ],
             SvgPicture.asset(
-              'assets/icons/${profile.skinType.toLowerCase()}.svg',
+              // 'assets/icons/${profile.skinType.toLowerCase()}.svg',
+              'assets/icons/water.svg',
+
               color: AppColors.MainColor,
               width: 20,
               height: 20,
@@ -412,7 +406,10 @@ class ProfileSummaryView extends StatelessWidget {
               ),
             ],
           ),
+
           const SizedBox(height: 16),
+
+          /// 🔢 Statistics row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -433,51 +430,48 @@ class ProfileSummaryView extends StatelessWidget {
               ),
             ],
           ),
+
           const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.MainColor.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppColors.MainColor.withOpacity(0.2),
-                width: 1,
+
+          /// 🎖️ BADGE SECTION TITLE
+          Row(
+            children: [
+              SvgPicture.asset(
+                'assets/icons/badge.svg',
+                color: AppColors.MainColor,
+                width: 20,
+                height: 20,
               ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    SvgPicture.asset(
-                      'assets/icons/badge.svg',
-                      color: AppColors.MainColor,
-                      width: 20,
-                      height: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'My Badges',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.black,
-                      ),
-                    ),
-                  ],
+              const SizedBox(width: 8),
+              const Text(
+                'My Badges',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.black,
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildBadge('assets/icons/badge.svg'),
-                    _buildBadge('assets/icons/badge2.svg'),
-                    _buildBadge('assets/icons/dimond.svg'),
-                    _buildBadge('assets/icons/Group.svg'),
-                    _buildBadge('assets/icons/police.svg'),
-                  ],
-                ),
-              ],
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          /// 🎖️ ENHANCED BADGES SLIDER with PageView (Swipe one-by-one)
+          SizedBox(
+            height: 170,
+            child: PageView.builder(
+              controller: PageController(
+                viewportFraction: 0.88, // Shows part of next card
+              ),
+              physics: const BouncingScrollPhysics(),
+              itemCount: badges.length,
+              itemBuilder: (context, index) {
+                final badge = badges[index];
+                return Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: _buildBadgeCard(badge),
+                );
+              },
             ),
           ),
         ],
@@ -489,7 +483,7 @@ class ProfileSummaryView extends StatelessWidget {
     return Expanded(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: AppColors.MainColor.withOpacity(0.08),
           borderRadius: BorderRadius.circular(16),
@@ -507,7 +501,7 @@ class ProfileSummaryView extends StatelessWidget {
               label,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 10,
                 color: AppColors.greyDark,
                 height: 1.2,
               ),
@@ -527,18 +521,6 @@ class ProfileSummaryView extends StatelessWidget {
     );
   }
 
-  Widget _buildBadge(String svgPath) {
-    return SizedBox(
-      width: 50,
-      height: 50,
-      child: Center(
-        child: SvgPicture.asset(
-          svgPath,
-          color: AppColors.MainColor,
-        ),
-      ),
-    );
-  }
 
   Widget _buildHistoryButton(BuildContext context) {
     return SizedBox(
@@ -626,6 +608,106 @@ class ProfileSummaryView extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBadgeCard(BadgeItem badge) {
+    return Container(
+      width: 300,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.MainColor,
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center, // <-- vertical centering
+        crossAxisAlignment: CrossAxisAlignment.start, // still align text to start horizontally
+        children: [
+          Row(
+            children: [
+              SvgPicture.asset(
+                badge.icon,
+                color: AppColors.MainColor,
+                width: 25,
+                height: 25,
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  badge.title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.MainColor2,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 8),
+
+          Text(
+            badge.description,
+            style: TextStyle(
+              fontSize: 13,
+              color: AppColors.greyDark,
+            ),
+          ),
+
+          SizedBox(height: 10),
+
+          Row(
+            children: [
+              SvgPicture.asset(
+                'assets/icons/book.svg',
+                width: 20,
+                height: 20,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '${badge.associatedRecipes} recettes associées',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.greyMedium,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // smaller padding
+                decoration: BoxDecoration(
+                  color: AppColors.Hover,
+                  borderRadius: BorderRadius.circular(6), // smaller radius
+                  border: Border.all(
+                    color: AppColors.MainColor,
+                    width: 1,
+                  ),
+                ),
+                child: const Text(
+                  'Détails',
+                  style: TextStyle(
+                    fontSize: 12, // optional: smaller text
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+
+            ],
+          )
+        ],
       ),
     );
   }

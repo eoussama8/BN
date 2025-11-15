@@ -191,7 +191,7 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
             ),
           ),
           const Text(
-            "Edit Profile",
+            "Edite Profile",
             style: TextStyle(
               fontSize: 20,
               color: AppColors.white,
@@ -210,7 +210,7 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
               child: const Icon(
                 Icons.menu,
                 color: AppColors.white,
-                size: 24,
+                size: 38,
               ),
             ),
           ),
@@ -221,6 +221,7 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
 
   // ---------- Floating Avatar ----------
   Widget _buildAvatar() {
+    // Check if platform is mobile
     final isMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
 
     return Positioned(
@@ -234,6 +235,7 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
           onTapUp: isMobile ? (_) => setState(() => _isAvatarHovered = false) : null,
           onTapCancel: isMobile ? () => setState(() => _isAvatarHovered = false) : null,
           child: MouseRegion(
+            // On web/desktop: use hover
             onEnter: !isMobile ? (_) => setState(() => _isAvatarHovered = true) : null,
             onExit: !isMobile ? (_) => setState(() => _isAvatarHovered = false) : null,
             child: Stack(
@@ -266,7 +268,7 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
                         : const AssetImage("assets/images/placeholder.png")),
                   ),
                 ),
-                // Improved hover/edit overlay
+                // Improved hover/edit overlay with better design
                 AnimatedOpacity(
                   opacity: _isAvatarHovered ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 250),
@@ -279,8 +281,8 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          AppColors.greyLight.withOpacity(0.95),
-                          AppColors.greyLight.withOpacity(0.95),
+                          AppColors.greyLight.withOpacity(0.85),
+                          AppColors.greyLight.withOpacity(0.85),
                         ],
                       ),
                     ),
@@ -290,12 +292,12 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.25),
+                            // color: Colors.white.withOpacity(0.25),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
                             Icons.edit,
-                            color: Colors.white,
+                            color: AppColors.MainColor,
                             size: 28,
                           ),
                         ),
@@ -310,6 +312,7 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
       ),
     );
   }
+
 
   // ---------- Main Content ----------
   Widget _buildMainContent() {
@@ -326,26 +329,20 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
       child: SingleChildScrollView(
         child: Column(
           children: [
-            const SizedBox(height: 45),
+            // Remove extra SizedBox and grey background
             Align(
-              alignment: Alignment.centerLeft,
+              alignment: Alignment.topLeft, // ensure it's at the top
               child: GestureDetector(
                 onTap: () => Navigator.pop(context),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.greyLight.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.arrow_back,
-                    color: AppColors.black,
-                    size: 24,
-                  ),
+                child: const Icon(
+                  Icons.arrow_back,
+                  color: AppColors.black,
+                  size: 24,
                 ),
               ),
             ),
-            const SizedBox(height: 25),
+
+            const SizedBox(height: 25), // spacing after back arrow
             _buildPersonalDetailsCard(),
             const SizedBox(height: 25),
             _buildSkinTypeCard(),
@@ -455,6 +452,7 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
             ),
           ),
           const SizedBox(height: 16),
+
           Wrap(
             spacing: 12,
             runSpacing: 12,
@@ -467,8 +465,13 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
                 onTap: () => setState(() => _skinType = type),
                 child: Container(
                   width: 82,
-                  height: 100,
                   padding: const EdgeInsets.all(12),
+
+                  // 🔥 FIX: Remove hard height
+                  constraints: const BoxConstraints(
+                    minHeight: 100,
+                  ),
+
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
@@ -489,12 +492,16 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
                       const SizedBox(height: 10),
                       Text(
                         type,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 7,
+                          fontSize: type == "Combination" ? 8 : 12,
                           color: selected ? AppColors.MainColor : AppColors.greyDark,
                           fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
                         ),
-                      ),
+                      )
+
+
                     ],
                   ),
                 ),
@@ -504,7 +511,9 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
         ],
       ),
     );
+
   }
+
 
   Widget _buildAllergiesCard() {
     return _card(

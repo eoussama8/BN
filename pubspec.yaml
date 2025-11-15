@@ -92,6 +92,9 @@ flutter:
     - assets/icons/recompenses2.svg
     - assets/icons/settings.svg
     - assets/icons/edit.svg
+    - assets/icons/water.svg
+    - assets/icons/book.svg
+    - assets/icons/history.svg
     - assets/icons/task.svg
     - assets/icons/birday.svg
     - assets/icons/chart.svg

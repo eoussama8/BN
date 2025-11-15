@@ -277,8 +277,8 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          AppColors.greyLight.withOpacity(0.95),
-                          AppColors.greyLight.withOpacity(0.95),
+                          AppColors.greyLight.withOpacity(0.85),
+                          AppColors.greyLight.withOpacity(0.85),
                         ],
                       ),
                     ),
@@ -288,12 +288,12 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.25),
+                            // color: Colors.white.withOpacity(0.25),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
                             Icons.edit,
-                            color: Colors.white,
+                            color: AppColors.MainColor,
                             size: 28,
                           ),
                         ),
@@ -483,6 +483,7 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
             ),
           ),
           const SizedBox(height: 16),
+
           Wrap(
             spacing: 12,
             runSpacing: 12,
@@ -495,8 +496,13 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
                 onTap: () => setState(() => _skinType = type),
                 child: Container(
                   width: 82,
-                  height: 100,
                   padding: const EdgeInsets.all(12),
+
+                  // 🔥 FIX: Remove hard height
+                  constraints: const BoxConstraints(
+                    minHeight: 100,
+                  ),
+
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
@@ -517,12 +523,16 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
                       const SizedBox(height: 10),
                       Text(
                         type,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 7,
+                          fontSize: type == "Combination" ? 8 : 12,
                           color: selected ? AppColors.MainColor : AppColors.greyDark,
                           fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
                         ),
-                      ),
+                      )
+
+
                     ],
                   ),
                 ),
@@ -532,6 +542,7 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
         ],
       ),
     );
+
   }
 
   Widget _buildAllergiesCard() {
