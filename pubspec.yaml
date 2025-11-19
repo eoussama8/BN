@@ -75,6 +75,7 @@ flutter:
 
   assets:
     - assets/icons/normal.svg
+    - assets/icons/edit_ava.svg
     - assets/icons/dry.svg
     - assets/icons/oily.svg
     - assets/icons/sensitive.svg

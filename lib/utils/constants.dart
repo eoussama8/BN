@@ -34,6 +34,8 @@ class AppColors {
   static const Color MainColor = Color(0xFFCF3085);
   static const Color MainColor2 = Color(0xFFF4639B);
 
+  static const Color Hover2 = Color(0xFFFBF0F0);
+
 
   static const Color Hover = Color(0xFFFCD2E2);
 

@@ -191,7 +191,7 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
             ),
           ),
           const Text(
-            "Edite Profile",
+            "Edit Profile",
             style: TextStyle(
               fontSize: 20,
               color: AppColors.white,
@@ -221,7 +221,6 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
 
   // ---------- Floating Avatar ----------
   Widget _buildAvatar() {
-    // Check if platform is mobile
     final isMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
 
     return Positioned(
@@ -235,11 +234,12 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
           onTapUp: isMobile ? (_) => setState(() => _isAvatarHovered = false) : null,
           onTapCancel: isMobile ? () => setState(() => _isAvatarHovered = false) : null,
           child: MouseRegion(
-            // On web/desktop: use hover
             onEnter: !isMobile ? (_) => setState(() => _isAvatarHovered = true) : null,
             onExit: !isMobile ? (_) => setState(() => _isAvatarHovered = false) : null,
             child: Stack(
+              alignment: Alignment.center,
               children: [
+                // Border container
                 Container(
                   width: 120,
                   height: 120,
@@ -257,51 +257,61 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
                       ),
                     ],
                   ),
-                  child: CircleAvatar(
-                    radius: 58,
-                    backgroundImage: _avatarImageXFile != null
+                ),
+
+                // CircleAvatar with image or SVG
+                CircleAvatar(
+                  radius: 58,
+                  backgroundColor: AppColors.Hover,
+                  child: ClipOval(
+                    child: _avatarImageXFile != null
                         ? (kIsWeb
-                        ? NetworkImage(_avatarImageXFile!.path)
-                        : FileImage(_avatarImageFile!) as ImageProvider)
+                        ? Image.network(
+                      _avatarImageXFile!.path,
+                      width: 116,
+                      height: 116,
+                      fit: BoxFit.cover,
+                    )
+                        : Image.file(
+                      _avatarImageFile!,
+                      width: 116,
+                      height: 116,
+                      fit: BoxFit.cover,
+                    ))
                         : (_avatarUrl != null
-                        ? NetworkImage(_avatarUrl!)
-                        : const AssetImage("assets/images/placeholder.png")),
+                        ? Image.network(
+                      _avatarUrl!,
+                      width: 116,
+                      height: 116,
+                      fit: BoxFit.cover,
+                    )
+                        : SvgPicture.asset(
+                      'assets/icons/edit_ava.svg',
+                      width: 28,
+                      height: 28,
+                      color: AppColors.MainColor,
+                    )),
                   ),
                 ),
-                // Improved hover/edit overlay with better design
+
+                // Hover overlay (slightly smaller so border is visible)
                 AnimatedOpacity(
                   opacity: _isAvatarHovered ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 250),
                   child: Container(
-                    width: 120,
-                    height: 120,
+                    width: 116, // slightly smaller than border
+                    height: 116,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          AppColors.greyLight.withOpacity(0.85),
-                          AppColors.greyLight.withOpacity(0.85),
-                        ],
-                      ),
+                      color: AppColors.Hover.withOpacity(0.4), // semi-transparent overlay
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            // color: Colors.white.withOpacity(0.25),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.edit,
-                            color: AppColors.MainColor,
-                            size: 28,
-                          ),
-                        ),
-                      ],
+                    child: Center(
+                      child: SvgPicture.asset(
+                        'assets/icons/edit_ava.svg',
+                        width: 28,
+                        height: 28,
+                        color: AppColors.MainColor,
+                      ),
                     ),
                   ),
                 ),
@@ -312,7 +322,6 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
       ),
     );
   }
-
 
   // ---------- Main Content ----------
   Widget _buildMainContent() {
@@ -364,9 +373,9 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
         children: [
           _title("Personal Details"),
           const SizedBox(height: 16),
-          _textField("Prénom", _firstName),
+          _textField("First Name", _firstName),
           const SizedBox(height: 16),
-          _textField("Nom", _lastName),
+          _textField("Last Name", _lastName),
           const SizedBox(height: 16),
           _buildAgeField(),
         ],
@@ -400,7 +409,7 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
             controller: controller,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
-              hintText: "Entrez votre âge",
+              hintText: "Enter your age",
               hintStyle: TextStyle(
                 color: AppColors.greyLight.withOpacity(0.6),
                 fontSize: 14,
@@ -442,10 +451,10 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _title("Types De Peau"),
+          _title("Skin Types"),
           const SizedBox(height: 8),
           const Text(
-            "Sélectionner votre peau",
+            "Select your skin",
             style: TextStyle(
               fontSize: 13,
               color: AppColors.greyMedium,
@@ -523,7 +532,7 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
           _title("Allergies"),
           const SizedBox(height: 8),
           const Text(
-            "Vos Allergies",
+            "Your Allergies",
             style: TextStyle(
               fontSize: 13,
               color: AppColors.greyMedium,
@@ -535,20 +544,16 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
               spacing: 8,
               runSpacing: 8,
               children: selectedAllergies.map((item) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppColors.MainColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: AppColors.MainColor,
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.MainColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
                         item,
                         style: const TextStyle(
                           color: AppColors.MainColor,
@@ -556,17 +561,27 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      GestureDetector(
+                    ),
+                    Positioned(
+                      top: -8,
+                      right: -8,
+                      child: GestureDetector(
                         onTap: () => setState(() => selectedAllergies.remove(item)),
-                        child: const Icon(
-                          Icons.close,
-                          size: 16,
-                          color: AppColors.MainColor,
+                        child: Container(
+                          width: 24,
+                          height: 24,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            size: 20,
+                            color: AppColors.MainColor,
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 );
               }).toList(),
             ),
@@ -576,7 +591,6 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
       ),
     );
   }
-
   Widget _card({required Widget child}) {
     return Container(
       width: double.infinity,
@@ -644,14 +658,17 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
               fontWeight: FontWeight.w500,
             ),
             onChanged: (v) {
-              if (label == "Prénom") _firstName = v;
-              if (label == "Nom") _lastName = v;
+              if (label == "First Name") _firstName = v;
+              if (label == "Last Name") _lastName = v;
             },
           ),
         ),
       ],
     );
   }
+
+
+
 
   Widget _buildAllergySearchBox() {
     final filteredOptions = allergyOptions
@@ -668,70 +685,59 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
       child: Column(
         children: [
           // Search Input
-          TextField(
-            onChanged: (value) {
-              setState(() {
-                _allergySearchQuery = value;
-                _isSearchFocused = true;
-              });
-            },
-            onTap: () {
-              setState(() => _isSearchFocused = true);
-            },
-            decoration: InputDecoration(
-              hintText: "Ajouter une allergie",
-              hintStyle: const TextStyle(
-                color: AppColors.white,
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: TextField(
+              onChanged: (value) {
+                setState(() {
+                  _allergySearchQuery = value;
+                  _isSearchFocused = true;
+                });
+              },
+              onTap: () {
+                setState(() => _isSearchFocused = true);
+              },
+              decoration: InputDecoration(
+                hintText: "Add an allergy",
+                hintStyle: TextStyle(
+                  color: AppColors.greyMedium.withOpacity(0.8),
+                  fontSize: 14,
+                ),
+                suffixIcon: const Icon(
+                  Icons.search,
+                  color: AppColors.MainColor,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: AppColors.white,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+              style: const TextStyle(
+                color: AppColors.black,
                 fontSize: 14,
               ),
-              suffixIcon: const Icon(
-                Icons.search,
-                color: AppColors.white,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              filled: true,
-              fillColor: AppColors.MainColor,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            ),
-            style: const TextStyle(
-              color: AppColors.white,
-              fontSize: 14,
             ),
           ),
 
-          // List of filtered allergies with animation
+          // Show filtered options with animation
           if (_isSearchFocused && filteredOptions.isNotEmpty)
-            Container(
-              constraints: const BoxConstraints(maxHeight: 150),
-              decoration: BoxDecoration(
-                color: AppColors.MainColor.withOpacity(0.95),
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(12),
-                  bottomRight: Radius.circular(12),
-                ),
-              ),
-              child: ListView.builder(
-                shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                itemCount: filteredOptions.length,
-                itemBuilder: (context, index) {
-                  final allergy = filteredOptions[index];
-                  return _AllergyListItem(
-                    allergy: allergy,
-                    onTap: () {
-                      setState(() {
-                        selectedAllergies.add(allergy);
-                        _allergySearchQuery = "";
-                        _isSearchFocused = false;
-                      });
-                    },
-                  );
+            ...filteredOptions.map((allergy) {
+              return _AllergyListItem(
+                allergy: allergy,
+                onTap: () {
+                  setState(() {
+                    selectedAllergies.add(allergy);
+                    _allergySearchQuery = "";
+                    _isSearchFocused = false;
+                  });
                 },
-              ),
-            ),
+              );
+            }).toList(),
+
+          if (_isSearchFocused) const SizedBox(height: 12),
         ],
       ),
     );
@@ -761,6 +767,7 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
     );
   }
 }
+
 
 // Animated allergy list item widget
 class _AllergyListItem extends StatefulWidget {
@@ -817,21 +824,26 @@ class _AllergyListItemState extends State<_AllergyListItem> with SingleTickerPro
         _animationController.reverse();
       },
       child: Container(
+        width: double.infinity,                // 🔥 make it full width
+        alignment: Alignment.centerLeft,       // 🔥 align content to the left
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         child: AnimatedBuilder(
           animation: _animation,
           builder: (context, child) {
             return Stack(
               children: [
-                // Background container
+                // Background container (full width)
                 Container(
+                  width: double.infinity,      // 🔥 full width
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: Colors.transparent,
                     borderRadius: BorderRadius.circular(8),
                   ),
+                  alignment: Alignment.centerLeft, // 🔥 text left
                   child: Text(
-                    "• ${widget.allergy}",
+                    "+ ${widget.allergy}",
+                    textAlign: TextAlign.left,    // 🔥 ensure left
                     style: TextStyle(
                       color: _isPressed ? AppColors.MainColor : AppColors.white,
                       fontSize: 14,
@@ -839,7 +851,8 @@ class _AllergyListItemState extends State<_AllergyListItem> with SingleTickerPro
                     ),
                   ),
                 ),
-                // Animated fill overlay
+
+                // Animated overlay
                 Positioned.fill(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
@@ -848,20 +861,21 @@ class _AllergyListItemState extends State<_AllergyListItem> with SingleTickerPro
                       child: FractionallySizedBox(
                         widthFactor: _animation.value,
                         child: Container(
-                          decoration: BoxDecoration(
-                            color: AppColors.Hover,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                          color: AppColors.Hover,
                         ),
                       ),
                     ),
                   ),
                 ),
-                // Text on top
+
+                // Top text (full width)
                 Container(
+                  width: double.infinity,          // 🔥 full width
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  alignment: Alignment.centerLeft,  // 🔥 left
                   child: Text(
-                    "• ${widget.allergy}",
+                    "+ ${widget.allergy}",
+                    textAlign: TextAlign.left,
                     style: TextStyle(
                       color: _isPressed ? AppColors.MainColor : AppColors.white,
                       fontSize: 14,
