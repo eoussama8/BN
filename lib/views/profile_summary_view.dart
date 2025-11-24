@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../models/BadgeItem.dart';
 import '../models/profile_model.dart';
 import '../utils/constants.dart';
+import 'badge_detail_view.dart';
 import 'profile_edit_view.dart';
 
 class ProfileSummaryView extends StatelessWidget {
@@ -13,6 +14,8 @@ class ProfileSummaryView extends StatelessWidget {
   final int challengesCompleted;
   final int beautyCoins;
   final int testedRecipes;
+
+
 
   const ProfileSummaryView({
     Key? key,
@@ -469,7 +472,7 @@ class ProfileSummaryView extends StatelessWidget {
                 final badge = badges[index];
                 return Padding(
                   padding: const EdgeInsets.only(right: 12),
-                  child: _buildBadgeCard(badge),
+                  child: _buildBadgeCard(context,badge),
                 );
               },
             ),
@@ -520,6 +523,9 @@ class ProfileSummaryView extends StatelessWidget {
       ),
     );
   }
+
+
+
 
 
   Widget _buildHistoryButton(BuildContext context) {
@@ -612,103 +618,113 @@ class ProfileSummaryView extends StatelessWidget {
     );
   }
 
-  Widget _buildBadgeCard(BadgeItem badge) {
-    return Container(
-      width: 300,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.MainColor,
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: Offset(0, 3),
+  Widget _buildBadgeCard(BuildContext context, BadgeItem badge) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BadgeDetailView(badge: badge),
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center, // <-- vertical centering
-        crossAxisAlignment: CrossAxisAlignment.start, // still align text to start horizontally
-        children: [
-          Row(
-            children: [
-              SvgPicture.asset(
-                badge.icon,
-                color: AppColors.MainColor,
-                width: 25,
-                height: 25,
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  badge.title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.MainColor2,
-                  ),
-                ),
-              ),
-            ],
+        );
+      },
+      child: Container(
+        width: 300,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: AppColors.MainColor,
+            width: 2,
           ),
-
-          SizedBox(height: 8),
-
-          Text(
-            badge.description,
-            style: TextStyle(
-              fontSize: 13,
-              color: AppColors.greyDark,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
             ),
-          ),
-
-          SizedBox(height: 10),
-
-          Row(
-            children: [
-              SvgPicture.asset(
-                'assets/icons/book.svg',
-                width: 20,
-                height: 20,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                '${badge.associatedRecipes} recettes associées',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.greyMedium,
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                SvgPicture.asset(
+                  badge.icon,
+                  color: AppColors.MainColor,
+                  width: 25,
+                  height: 25,
                 ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // smaller padding
-                decoration: BoxDecoration(
-                  color: AppColors.Hover,
-                  borderRadius: BorderRadius.circular(6), // smaller radius
-                  border: Border.all(
-                    color: AppColors.MainColor,
-                    width: 1,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    badge.title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.MainColor2,
+                    ),
                   ),
                 ),
-                child: const Text(
-                  'Détails',
-                  style: TextStyle(
-                    fontSize: 12, // optional: smaller text
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600,
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              badge.description,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.greyDark,
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            Row(
+              children: [
+                SvgPicture.asset(
+                  'assets/icons/book.svg',
+                  width: 20,
+                  height: 20,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '${badge.associatedRecipes} recettes associées',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.greyMedium,
                   ),
                 ),
-              ),
-
-            ],
-          )
-        ],
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.Hover,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: AppColors.MainColor,
+                      width: 1,
+                    ),
+                  ),
+                  child: const Text(
+                    'Détails',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
+
 }
