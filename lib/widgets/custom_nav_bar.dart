@@ -23,7 +23,7 @@ class CustomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 75,
+      height: 60,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [Color(0xFFCF3085), Color(0xFFF4639B)],
@@ -37,12 +37,11 @@ class CustomNavBar extends StatelessWidget {
         children: List.generate(5, (index) {
           final bool active = index == selectedIndex;
 
-          // --- ICÔNES (SVG sur index 2)
           Widget iconWidget;
           if (index == 2) {
             iconWidget = SvgPicture.asset(
-              "lib/assets/icons/defis.svg",
-              height: active ? 26 : 22,
+              "assets/icons/defis.svg",
+              height: active ? 22 : 18,
               colorFilter: ColorFilter.mode(
                 active ? const Color(0xFFCF3085) : Colors.white,
                 BlendMode.srcIn,
@@ -60,9 +59,9 @@ class CustomNavBar extends StatelessWidget {
               index == 3
                   ? UniconsLine.heart
                   : index == 4
-                      ? UniconsLine.user
-                      : icons[index],
-              size: active ? 26 : 24,
+                  ? UniconsLine.user
+                  : icons[index],
+              size: active ? 22 : 20, // smaller icon sizes
               color: active ? const Color(0xFFCF3085) : Colors.white,
             );
           }
@@ -75,18 +74,18 @@ class CustomNavBar extends StatelessWidget {
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
                   curve: Curves.easeOut,
-                  height: active ? 38 : 38,
-                  width: active ? 60 : 38,
+                  height: active ? 32 : 32,
+                  width: active ? 48 : 32,
                   decoration: active
                       ? BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(24),
-                        )
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  )
                       : null,
                   alignment: Alignment.center,
                   child: iconWidget,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 AnimatedOpacity(
                   opacity: active ? 1 : 0,
                   duration: const Duration(milliseconds: 200),
@@ -94,7 +93,7 @@ class CustomNavBar extends StatelessWidget {
                     labels[index],
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 10,
+                      fontSize: 9,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

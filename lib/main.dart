@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:beaute_naturelle_ia/services/http_override.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -7,6 +10,8 @@ import 'widgets/custom_nav_bar.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
+  HttpOverrides.global = MyHttpOverrides();  // ⬅️ IMPORTANT
+
   runApp(const MyApp());
 }
 
@@ -41,7 +46,7 @@ class _MyAppState extends State<MyApp> {
       title: 'My App',
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        extendBody: true,
+        extendBody: false,
         backgroundColor: Colors.white,
         body: _pages[_selectedIndex],
         bottomNavigationBar: CustomNavBar(

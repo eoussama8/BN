@@ -11,35 +11,36 @@ class BadgeItem {
     required this.associatedRecipes,
   });
 }
+
 final List<BadgeItem> badges = [
   BadgeItem(
     icon: 'assets/icons/badge.svg',
-    title: 'Badge Débutante',
-    description: 'Terminer votre première recette de beauté naturelle.',
+    title: 'Beginner Badge',
+    description: 'Complete your first natural beauty recipe.',
     associatedRecipes: 13,
   ),
   BadgeItem(
     icon: 'assets/icons/badge2.svg',
-    title: 'Badge Régulière',
-    description: 'Réaliser 5 recettes de beauté naturelle différentes.',
+    title: 'Regular Badge',
+    description: 'Complete 5 different natural beauty recipes.',
     associatedRecipes: 5,
   ),
   BadgeItem(
     icon: 'assets/icons/dimond.svg',
-    title: 'Badge Rapide',
-    description: 'Compléter une recette en moins de 10 minutes.',
+    title: 'Quick Badge',
+    description: 'Finish a recipe in less than 10 minutes.',
     associatedRecipes: 10,
   ),
   BadgeItem(
     icon: 'assets/icons/defis.svg',
-    title: 'Badge Fidèle',
-    description: 'Utiliser l’application pendant 30 jours consécutifs.',
+    title: 'Loyalty Badge',
+    description: 'Use the app for 30 consecutive days.',
     associatedRecipes: 0,
   ),
   BadgeItem(
     icon: 'assets/icons/police.svg',
-    title: 'Badge Éclat',
-    description: 'Partager 3 recettes préférées avec vos amis.',
+    title: 'Glow Badge',
+    description: 'Share 3 favorite recipes with your friends.',
     associatedRecipes: 0,
   ),
 ];
