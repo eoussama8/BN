@@ -31,7 +31,7 @@ final List<BadgeItem> badges = [
     associatedRecipes: 10,
   ),
   BadgeItem(
-    icon: 'assets/icons/Group.svg',
+    icon: 'assets/icons/defis.svg',
     title: 'Badge Fidèle',
     description: 'Utiliser l’application pendant 30 jours consécutifs.',
     associatedRecipes: 0,

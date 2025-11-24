@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'views/home_view.dart';
-import 'views/contact_view.dart';
+
 import 'views/profile_view.dart';
-import 'widgets/bottom_nav_bar.dart';
+import 'widgets/custom_nav_bar.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env'); // Always use the asset path
+  await dotenv.load(fileName: '.env');
   runApp(const MyApp());
 }
 
@@ -19,17 +18,20 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _selectedNav = "Home";
 
-  final Map<String, Widget> _pages = {
-    "Home": const HomeView(),
-    "Contact": const ContactView(),
-    "Profile": const ProfileView(),
-  };
+  int _selectedIndex = 4; // Start directly on Profile tab
 
-  void _onNavChange(String label) {
+  final List<Widget> _pages = const [
+    SizedBox(),     // Home
+    SizedBox(),     // Recipes
+    SizedBox(),     // Challenges
+    SizedBox(),     // Favorites
+    ProfileView(),  // Profile (your only real screen)
+  ];
+
+  void _onNavChange(int index) {
     setState(() {
-      _selectedNav = label;
+      _selectedIndex = index;
     });
   }
 
@@ -40,11 +42,11 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         extendBody: true,
-        backgroundColor: Colors.transparent,
-        body: _pages[_selectedNav] ?? const SizedBox(),
-        bottomNavigationBar: BottomNavBar(
-          selectedNav: _selectedNav,
-          onNavChange: _onNavChange,
+        backgroundColor: Colors.white,
+        body: _pages[_selectedIndex],
+        bottomNavigationBar: CustomNavBar(
+          selectedIndex: _selectedIndex,
+          onTap: _onNavChange,
         ),
       ),
     );

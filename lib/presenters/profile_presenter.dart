@@ -157,7 +157,43 @@ class ProfilePresenter {
     }
 
     // ✅ Validate allergies
-    const validAllergies = ["Gluten", "Pollen", "Dust", "Nut", "Milk", "Pet Dander"];
+    const validAllergies =  [
+      // Food allergies
+      "Milk",
+      "Eggs",
+      "Peanuts",
+      "Tree Nuts",
+      "Soy",
+      "Wheat (Gluten)",
+      "Fish",
+      "Shellfish",
+      "Sesame",
+      "Celery",
+      "Mustard",
+      "Lupin",
+      "Sulfites",
+
+      // Environmental allergies
+      "Pollen",
+      "Dust Mites",
+      "Mold",
+      "Pet Dander",
+      "Insect Stings",
+      "Chemical Products",
+
+      // Contact skin allergies
+      "Nickel",
+      "Latex",
+      "Fragrances",
+      "Preservatives",
+      "Colorants",
+      "Metals",
+      "Resins",
+
+      // Other allergies
+      "Medications",
+      "Feathers",
+    ];
     final invalidAllergies = profile.allergyTypes.where((a) => !validAllergies.contains(a)).toList();
 
     if (invalidAllergies.isNotEmpty) {
@@ -245,7 +281,44 @@ class ProfilePresenter {
       return false;
     }
 
-    const validAllergies = ["Gluten", "Pollen", "Dust", "Nut", "Milk", "Pet Dander"];
+    const validAllergies =  [
+      // Food allergies
+      "Milk",
+      "Eggs",
+      "Peanuts",
+      "Tree Nuts",
+      "Soy",
+      "Wheat (Gluten)",
+      "Fish",
+      "Shellfish",
+      "Sesame",
+      "Celery",
+      "Mustard",
+      "Lupin",
+      "Sulfites",
+
+      // Environmental allergies
+      "Pollen",
+      "Dust Mites",
+      "Mold",
+      "Pet Dander",
+      "Insect Stings",
+      "Chemical Products",
+
+      // Contact skin allergies
+      "Nickel",
+      "Latex",
+      "Fragrances",
+      "Preservatives",
+      "Colorants",
+      "Metals",
+      "Resins",
+
+      // Other allergies
+      "Medications",
+      "Feathers",
+    ];
+
     for (var allergy in profile.allergyTypes) {
       if (!validAllergies.contains(allergy)) {
         view.showError("Invalid allergy selected: $allergy");

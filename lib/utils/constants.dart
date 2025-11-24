@@ -26,10 +26,7 @@ class AppColors {
   static const Color greyTitle = Color(0xFF434343);
   static const Color greyMedium70 = Color(0xB2757575); // 70% opacity
   static const Color greyLight = Color(0xFF5A5A5A);
-  static const Color greenPastel = Color(0xFFE1EDD2);
-  static const Color greenDark = Color(0xFF67815A);
-  static const Color green1 = Color(0xFF97A087);
-  static const Color green2 = Color(0xFF8CA87D);
+
 
   static const Color MainColor = Color(0xFFCF3085);
   static const Color MainColor2 = Color(0xFFF4639B);
@@ -54,8 +51,5 @@ class AppColors {
   static const Color textGreen = Color(0xFF67815A);
   static const Color black = Color(0xFF000000);
 
-  // Icon colors (can reuse main colors or define new ones)
-  static const Color iconGrey = greyMedium;
-  static const Color iconGreen = greenDark;
-  static const Color iconRed = red;
+
 }

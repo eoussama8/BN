@@ -30,7 +30,43 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
   int? _age;
 
   List<String> selectedAllergies = [];
-  final List<String> allergyOptions = ["Gluten", "Pollen", "Dust", "Nut", "Milk", "Pet Dander"];
+  final List<String> allergyOptions = [
+    // Food allergies
+    "Milk",
+    "Eggs",
+    "Peanuts",
+    "Tree Nuts",
+    "Soy",
+    "Wheat (Gluten)",
+    "Fish",
+    "Shellfish",
+    "Sesame",
+    "Celery",
+    "Mustard",
+    "Lupin",
+    "Sulfites",
+
+    // Environmental allergies
+    "Pollen",
+    "Dust Mites",
+    "Mold",
+    "Pet Dander",
+    "Insect Stings",
+    "Chemical Products",
+
+    // Contact skin allergies
+    "Nickel",
+    "Latex",
+    "Fragrances",
+    "Preservatives",
+    "Colorants",
+    "Metals",
+    "Resins",
+
+    // Other allergies
+    "Medications",
+    "Feathers",
+  ];
   String _allergySearchQuery = "";
   bool _isSearchFocused = false;
 
@@ -462,61 +498,73 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
           ),
           const SizedBox(height: 16),
 
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: skinTypes.entries.map((entry) {
-              final type = entry.key;
-              final svgPath = entry.value;
-              final bool selected = _skinType == type;
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final double availableWidth = constraints.maxWidth;
+              final double itemWidth = (availableWidth - 24) / 3;
+              // 24 = spacing(12) * 2
 
-              return GestureDetector(
-                onTap: () => setState(() => _skinType = type),
-                child: Container(
-                  width: 82,
-                  padding: const EdgeInsets.all(12),
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: skinTypes.entries.map((entry) {
+                  final type = entry.key;
+                  final svgPath = entry.value;
+                  final bool selected = _skinType == type;
 
-                  // 🔥 FIX: Remove hard height
-                  constraints: const BoxConstraints(
-                    minHeight: 100,
-                  ),
+                  return GestureDetector(
+                    onTap: () => setState(() => _skinType = type),
+                    child: Container(
+                      width: itemWidth,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                      constraints: const BoxConstraints(minHeight: 110),
 
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: selected ? AppColors.MainColor : AppColors.greyLight.withOpacity(0.3),
-                      width: selected ? 2 : 1,
-                    ),
-                    color: selected ? AppColors.MainColor.withOpacity(0.05) : AppColors.white,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset(
-                        svgPath,
-                        width: 40,
-                        height: 40,
-                        color: selected ? AppColors.MainColor : AppColors.greyMedium,
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        type,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: type == "Combination" ? 8 : 12,
-                          color: selected ? AppColors.MainColor : AppColors.greyDark,
-                          fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: selected
+                              ? AppColors.MainColor
+                              : AppColors.greyLight.withOpacity(0.3),
+                          width: selected ? 2 : 1,
                         ),
-                      )
+                        color: selected
+                            ? AppColors.MainColor.withOpacity(0.05)
+                            : AppColors.white,
+                      ),
 
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset(
+                            svgPath,
+                            width: 40,
+                            height: 40,
+                            color: selected ? AppColors.MainColor : AppColors.greyMedium,
+                          ),
+                          const SizedBox(height: 10),
 
-                    ],
-                  ),
-                ),
+                          FittedBox(
+                            child: Text(
+                              type,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: selected
+                                    ? AppColors.MainColor
+                                    : AppColors.greyDark,
+                                fontWeight: selected
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
               );
-            }).toList(),
-          ),
+            },
+          )
         ],
       ),
     );

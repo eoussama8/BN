@@ -414,7 +414,7 @@ class ProfileSummaryView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildStatItem(
-                'assets/icons/Group.svg',
+                'assets/icons/defis.svg',
                 'Challenge\ncompleted',
                 '$challengesCompleted',
               ),
