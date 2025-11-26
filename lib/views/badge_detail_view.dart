@@ -67,7 +67,7 @@ class BadgeDetailView extends StatelessWidget {
                               height: 130,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: AppColors.Hover2.withOpacity(0.4),
+                                color: AppColors.Hover,
                               ),
                               child: Center(
                                 child: SvgPicture.asset(
@@ -109,8 +109,8 @@ class BadgeDetailView extends StatelessWidget {
                           Divider(
                             color: AppColors.greyMedium.withOpacity(0.18),
                             thickness: 1,
-                            indent: 40,
-                            endIndent: 40,
+                            indent: 20,
+                            endIndent: 20,
                           ),
 
                           const SizedBox(height: 20),
@@ -135,7 +135,22 @@ class BadgeDetailView extends StatelessWidget {
                             ],
                           ),
 
+                          const SizedBox(height: 14),
+
+                          // PROGRESS FIXED
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: LinearProgressIndicator(
+                              value: (badge.currentProgress / badge.requiredCount).clamp(0.0, 1.0),
+                              minHeight: 8,
+                              backgroundColor: AppColors.greyMedium.withOpacity(0.15),
+                              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.MainColor),
+                            ),
+                          ),
+
+
                           const SizedBox(height: 20),
+
 
                           // Progress section left
                           Row(
@@ -149,10 +164,10 @@ class BadgeDetailView extends StatelessWidget {
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: AppColors.Hover2,
-                                  borderRadius: BorderRadius.circular(16),
+                                  color: AppColors.Hover,
+                                  borderRadius: BorderRadius.circular(22),
                                 ),
                                 child: Text(
                                   badge.statusText,
@@ -168,18 +183,7 @@ class BadgeDetailView extends StatelessWidget {
                             ],
                           ),
 
-                          const SizedBox(height: 14),
 
-                          // PROGRESS FIXED
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: LinearProgressIndicator(
-                              value: (badge.currentProgress / badge.requiredCount).clamp(0.0, 1.0),
-                              minHeight: 8,
-                              backgroundColor: AppColors.greyMedium.withOpacity(0.15),
-                              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.MainColor),
-                            ),
-                          ),
 
                         ],
                       ),
@@ -199,11 +203,11 @@ class BadgeDetailView extends StatelessWidget {
                       child: ListTile(
                         onTap: () {},
                         leading: const Icon(Icons.menu_book,
-                            color: AppColors.MainColor, size: 28),
+                            color: AppColors.MainColor, size: 25),
                         title: const Text(
                           "Toutes les recettes Associées",
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 14,
                             color: AppColors.greyTitle,
                             fontWeight: FontWeight.w500,
                           ),
@@ -224,7 +228,7 @@ class BadgeDetailView extends StatelessWidget {
                           foregroundColor: AppColors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28),
+                            borderRadius: BorderRadius.circular(15),
                           ),
                           elevation: 0,
                         ),

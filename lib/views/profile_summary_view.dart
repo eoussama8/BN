@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../models/BadgeItem.dart';
 import '../models/profile_model.dart';
+import '../presenters/badge_presenter.dart';
 import '../utils/constants.dart';
 import 'badge_detail_view.dart';
 import 'profile_edit_view.dart';
+import 'package:provider/provider.dart';
+
 
 class ProfileSummaryView extends StatelessWidget {
   final Profile profile;
@@ -131,33 +134,32 @@ class ProfileSummaryView extends StatelessWidget {
 
   Widget _buildAvatar(BuildContext context) {
     return Positioned(
-      top: 25,
+      top: 0, // negative to float above the main card
       left: 0,
       right: 0,
       child: Center(
         child: Container(
-          width: 140,
-          height: 140,
+          width: 120,
+          height: 120,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
               color: AppColors.MainColor,
-              width: 3,
+              width: 2,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 15,
+                offset: const Offset(0, 5),
               ),
             ],
           ),
           child: CircleAvatar(
-            radius: 68,
+            radius: 58,
             backgroundImage: avatarUrl != null
                 ? NetworkImage(avatarUrl!)
-                : const AssetImage('assets/images/placeholder.png')
-            as ImageProvider,
+                : const AssetImage('assets/images/placeholder.png'),
           ),
         ),
       ),
@@ -166,8 +168,8 @@ class ProfileSummaryView extends StatelessWidget {
 
   Widget _buildMainContent(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(top: 100),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      margin: const EdgeInsets.only(top: 60), // leave space for avatar
+      padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
       decoration: const BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.only(
@@ -184,7 +186,7 @@ class ProfileSummaryView extends StatelessWidget {
             const SizedBox(height: 20),
             _buildAllergiesCard(),
             const SizedBox(height: 20),
-            _buildStatisticsCard(),
+            _buildStatisticsCard(context),
             const SizedBox(height: 20),
             _buildHistoryButton(context),
             const SizedBox(height: 15),
@@ -368,7 +370,9 @@ class ProfileSummaryView extends StatelessWidget {
     );
   }
 
-  Widget _buildStatisticsCard() {
+  Widget _buildStatisticsCard(BuildContext context) {
+    final presenter = context.watch<BadgePresenter>();
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -390,6 +394,7 @@ class ProfileSummaryView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 📊 Statistics header
           Row(
             children: [
               SvgPicture.asset(
@@ -412,31 +417,31 @@ class ProfileSummaryView extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          /// 🔢 Statistics row
+          // 🔢 Statistics row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildStatItem(
                 'assets/icons/defis.svg',
                 'Challenge\ncompleted',
-                '$challengesCompleted',
+                '${presenter.challengesCompleted}',
               ),
               _buildStatItem(
                 'assets/icons/dimond.svg',
                 'Beauty\ncoins',
-                '$beautyCoins',
+                '${presenter.beautyCoins}',
               ),
               _buildStatItem(
                 'assets/icons/task.svg',
                 'tested\nrecipes',
-                '$testedRecipes',
+                '${presenter.testedRecipes}',
               ),
             ],
           ),
 
           const SizedBox(height: 20),
 
-          /// 🎖️ BADGE SECTION TITLE
+          // 🎖️ BADGE SECTION TITLE
           Row(
             children: [
               SvgPicture.asset(
@@ -459,20 +464,20 @@ class ProfileSummaryView extends StatelessWidget {
 
           const SizedBox(height: 14),
 
-          /// 🎖️ ENHANCED BADGES SLIDER with PageView (Swipe one-by-one)
+          // 🎖️ BADGES SLIDER with PageView
           SizedBox(
             height: 170,
-            child: PageView.builder(
-              controller: PageController(
-                viewportFraction: 0.88, // Shows part of next card
-              ),
+            child: presenter.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : PageView.builder(
+              controller: PageController(viewportFraction: 0.88),
               physics: const BouncingScrollPhysics(),
-              itemCount: badges.length,
+              itemCount: presenter.allBadges.length,
               itemBuilder: (context, index) {
-                final badge = badges[index];
+                final badge = presenter.allBadges[index];
                 return Padding(
                   padding: const EdgeInsets.only(right: 12),
-                  child: _buildBadgeCard(context,badge),
+                  child: _buildBadgeCard(context, badge),
                 );
               },
             ),

@@ -257,7 +257,7 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
     final isMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
 
     return Positioned(
-      top: 25,
+      top: 0,
       left: 0,
       right: 0,
       child: Center(
@@ -358,8 +358,8 @@ class _ProfileViewState extends State<ProfileView> implements ProfileViewContrac
 
   Widget _buildMainContent() {
     return Container(
-      margin: const EdgeInsets.only(top: 85),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      margin: const EdgeInsets.only(top: 60),
+      padding: const EdgeInsets.only(top: 20, left: 24, right: 24),
       decoration: const BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.only(
