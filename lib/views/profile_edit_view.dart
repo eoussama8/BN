@@ -380,9 +380,9 @@ class _ProfileEditViewState extends State<ProfileEditView> implements ProfileVie
               child: GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: const Icon(
-                  Icons.arrow_back,
+                  Icons.arrow_back_ios,
                   color: AppColors.black,
-                  size: 24,
+                  size: 20,
                 ),
               ),
             ),
